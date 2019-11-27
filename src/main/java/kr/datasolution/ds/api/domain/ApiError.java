@@ -3,18 +3,19 @@ package kr.datasolution.ds.api.domain;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 public class ApiError {
 
+    private Long timestamp;
     private HttpStatus status;
-    private String timestamp;
     private String message;
     private String debugMessage;
     private List<ApiSubError> subErrors;
 
     private ApiError() {
-        this.timestamp = LocalDateTime.now().toString();
+        this.timestamp = LocalDateTime.now().atZone(ZoneId.of("Asia/Tokyo")).toEpochSecond();
     }
 
     public ApiError(HttpStatus status) {

@@ -1,12 +1,14 @@
 package kr.datasolution.ds.api.controller;
 
 import io.swagger.annotations.Api;
+import kr.datasolution.ds.api.domain.NewsRelatedTopicList;
 import kr.datasolution.ds.api.validator.EntityName;
 import kr.datasolution.ds.api.validator.Interval;
 import kr.datasolution.ds.api.domain.NewsNamedEntityList;
 import kr.datasolution.ds.api.service.ElasticSearchService;
 import kr.datasolution.ds.api.domain.NewsNamedEntitySummaryList;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,6 +28,16 @@ public class NewsController {
 
     @Autowired
     ElasticSearchService elasticSearchService;
+
+//    @RequestMapping(value = "/topic/related", method = RequestMethod.GET)
+//    public NewsRelatedTopicList getRelatedTopic(String query, String startDate, String endDate,
+//                                                @RequestParam(value = "interval", defaultValue = "1d")
+//                                                @Valid Interval interval, int size,
+//                                                @RequestParam(value = "sort", defaultValue = "DESC") String sort) {
+//        SortOrder sortOrder = SortOrder.valueOf(sort.toUpperCase());
+//        DateHistogramInterval dateHistogramInterval = new DateHistogramInterval(interval.getInterval());
+//        return elasticSearchService.getRelatedTopics(query, startDate, endDate, dateHistogramInterval, size, sortOrder);
+//    }
 
     @RequestMapping(value = "/timeline/summary", method = RequestMethod.GET, produces = "application/json")
     public Long getTimelineSummary(String query, String startDate, String endDate,

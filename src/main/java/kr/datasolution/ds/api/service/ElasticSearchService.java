@@ -1,19 +1,18 @@
 package kr.datasolution.ds.api.service;
 
 import com.google.gson.Gson;
-import kr.datasolution.ds.api.domain.NewsNamedEntityList;
-import kr.datasolution.ds.api.domain.NewsNamedEntitySummaryList;
-import kr.datasolution.ds.api.domain.NewsNamedEntitySummary;
-import kr.datasolution.ds.api.domain.NewsNamedEntity;
+import kr.datasolution.ds.api.domain.*;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
@@ -28,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.Cacheable;
 
 
+// https://grokonez.com/spring-framework/spring-boot/csv-file-download-from-springboot-restapi-opencsv-mysql
 @Service
 public class ElasticSearchService {
 
@@ -98,6 +98,7 @@ public class ElasticSearchService {
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.existsQuery(entityName));
+
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
                 .query(QueryBuilders.rangeQuery("written_time")
                         .from(startDate)
@@ -109,6 +110,7 @@ public class ElasticSearchService {
                 .size(size)
                 .sort(new FieldSortBuilder("written_time").order(SortOrder.DESC))
                 .query(boolQueryBuilder).fetchSource(includeFields, null);
+
         SearchRequest searchRequest = new SearchRequest(NEWS_IDX).source(searchSourceBuilder);
         SearchResponse searchResponse = elasticsearchTemplate.getClient().search(searchRequest).actionGet();
 
@@ -120,7 +122,45 @@ public class ElasticSearchService {
         }
         return newsNamedEntityList;
     }
+
+//    public NewsRelatedTopicList getRelatedTopics(String query, String startDate, String endDate,
+//                                                      DateHistogramInterval dateHistogramInterval, int size, SortOrder sort) {
+//        final DateHistogramBuilder dateHistogramBuilder = AggregationBuilders
+//                .dateHistogram("date_hist")
+//                .format("yyyyMMdd")
+//                .field("written_time")
+//                .interval(dateHistogramInterval)
+//                .order(Histogram.Order.COUNT_DESC)
+//                .subAggregation(AggregationBuilders
+//                        .terms("date_hist")
+//                        .field("actions")
+//                        .size(size));
+//
+//        final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+//                .query(QueryBuilders.rangeQuery("written_time")
+//                        .from(startDate)
+//                        .to(endDate)
+//                        .format("yyyyMMdd")
+//                        .includeLower(true)
+//                        .includeUpper(true))
+//                .query(QueryBuilders.queryStringQuery(query)
+//                        .defaultOperator(QueryStringQueryBuilder.Operator.AND)
+//                        .defaultField("content"))
+//                .size(0)
+//                .sort(new FieldSortBuilder("written_time"))
+//                .aggregation(dateHistogramBuilder);
+//
+//        SearchRequest searchRequest = new SearchRequest(NEWS_IDX).source(searchSourceBuilder);
+//        SearchResponse searchResponse = elasticsearchTemplate.getClient().search(searchRequest).actionGet();
+//
+//        Aggregations aggregations = searchResponse.getAggregations();
+//        Terms terms = aggregations.get("date_hist");
+//
+//        NewsRelatedTopicList newsRelatedTopicList = new NewsRelatedTopicList();
+//        for (Terms.Bucket bucket : terms.getBuckets()) {
+//            String keyAsString = bucket.getKeyAsString();
+//            long docCount = bucket.getDocCount();
+//        }
+//        return newsRelatedTopicList;
+//    }
 }
-
-
-// TODO: snake
