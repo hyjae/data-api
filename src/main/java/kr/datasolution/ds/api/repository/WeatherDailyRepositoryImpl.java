@@ -5,13 +5,11 @@ import kr.datasolution.ds.api.domain.WeatherDaily;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.Tuple;
-import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,13 +24,17 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepository {
     private EntityManager entityManager;
 
     @Override
-    public List<Object> findByColumnName(String columnName, String from, String to) {
+    public List<Object> findByColumnName(List<String> columnNames, String from, String to) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tuple> query = cb.createTupleQuery();
         Root<WeatherDaily> weatherDaily = query.from(WeatherDaily.class);
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.between(weatherDaily.get("date"), from, to));
+
+        List<Selection<?>> s = new LinkedList<>();
+        s.add(columnNames.get(0).);
+        columnNames.stream().map(i -> );
 
         query.multiselect(weatherDaily.get(columnName)).where(predicates.toArray(new Predicate[]{}));
         List<Object> collect = entityManager.createQuery(query)
