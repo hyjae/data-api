@@ -1,65 +1,79 @@
 package kr.datasolution.ds.api.domain;
 
+import kr.datasolution.ds.api.util.BigDecimalConverter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @Data
 @Entity
 @Table(name = "weather_daily")
-public class WeatherDaily {
+public class WeatherDaily implements Serializable {
 
-    @Id
+    @Id @GeneratedValue
     @Column(name = "daily_id")
     private Integer dailyId;
 
     @Column(name = "w_date")
     private Date wDate;
 
-    @Column(name = "area_code")
-    private Integer areaCode;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(foreignKey = @ForeignKey(name = "area_code"))
+    private WeatherArea areaCode;
 
-    @Column(name = "actual_Yn")
+    @Column(name = "actual_yn")
     private Integer actualYn;
 
     @Column(name = "w_description")
-    private Integer WDescription;
+    private String WDescription;
 
     @Column(name = "w_avg_ta")
-    private Float wAvgTa;
+    @Convert(converter = BigDecimalConverter.class)
+    private BigDecimal wAvgTa;
 
     @Column(name = "w_max_ta")
-    private Float wMaxTa;
+    @Convert(converter = BigDecimalConverter.class)
+    private BigDecimal wMaxTa;
 
     @Column(name = "w_min_ta")
-    private Float wMinTa;
+    @Convert(converter = BigDecimalConverter.class)
+    private BigDecimal wMinTa;
 
     @Column(name = "w_prob_rn")
-    private Float wProbRn;
+    @Convert(converter = BigDecimalConverter.class)
+    private BigDecimal wProbRn;
 
     @Column(name = "w_sum_rn")
-    private Float wSumRn;
+    @Convert(converter = BigDecimalConverter.class)
+    private BigDecimal wSumRn;
 
     @Column(name = "w_dd_mefs")
-    private Float wDdMefs;
+    @Convert(converter = BigDecimalConverter.class)
+    private BigDecimal wDdMefs;
 
     @Column(name = "w_max_wd")
     private Integer wMaxWd;
 
     @Column(name = "w_avg_ws")
-    private Float wAvgWs;
+    @Convert(converter = BigDecimalConverter.class)
+    private BigDecimal wAvgWs;
 
     @Column(name = "w_avg_rhm")
-    private Float wAvgRhm;
+    @Convert(converter = BigDecimalConverter.class)
+    private BigDecimal wAvgRhm;
 
     @Column(name = "w_avg_tca")
-    private Float wAvgTca;
+    @Convert(converter = BigDecimalConverter.class)
+    private BigDecimal wAvgTca;
 
     @Column(name = "a_pm10")
     private Integer aPm10;
@@ -76,7 +90,56 @@ public class WeatherDaily {
     @Column(name = "s_02_hrain")
     private Integer s02Hrain;
 
+    @Column(name = "s_03_cold")
+    private Integer s03Cold;
+
+    @Column(name = "s_04_dry")
+    private Integer s04Dry;
+
+    @Column(name = "s_05_ssurge")
+    private Integer s05Ssurge;
+
+    @Column(name = "s_06_hsea")
+    private Integer s06Hsea;
+
+    @Column(name = "s_07_typoon")
+    private Integer s07Typoon;
+
+    @Column(name = "s_08_hsnow")
+    private Integer s08Hsnow;
+
+    @Column(name = "s_09_ydust")
+    private Integer s09YDust;
+
+    @Column(name = "s_10_resv")
+    private Integer s10Resv;
+
+    @Column(name = "s_11_resv")
+    private Integer s11Resv;
+
+    @Column(name = "s_12_hheat")
+    private Integer s12Hheat;
+
+    @Column(name = "insert_ddtt")
+    private Timestamp insertDdtt; // Note: MySQL DATETIME maps to Timestamp, not DateTime!
+
+    @Column(name = "update_ddtt")
+    private Timestamp updateDdtt;
+
     public String toString() {
-        return String.join(",", "" + this.getDailyId(), "" + this.getWDate(), "" + this.getAreaCode());
+        StringBuilder stringBuilder = new StringBuilder();
+        Field[] declaredFields = WeatherDaily.class.getDeclaredFields();
+        for (int i = 0; i < declaredFields.length; ++i) {
+            try {
+                Object o = declaredFields[i].get(this);
+                stringBuilder.append(o.toString());
+                if (i != declaredFields.length - 1) {
+                    stringBuilder.append(", ");
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace(); // TODO: program exception
+            }
+        }
+        return stringBuilder.toString();
     }
 }
