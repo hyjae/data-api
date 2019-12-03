@@ -1,6 +1,8 @@
 //package kr.datasolution.ds.api.util;
 //
 //import java.io.PrintWriter;
+//import java.security.InvalidParameterException;
+//import java.util.Arrays;
 //import java.util.List;
 //
 //import com.opencsv.CSVWriter;
@@ -10,8 +12,14 @@
 //
 //public class WriteDataToCSV {
 //
-//    public static void writeDataToCsvUsingStringArray(PrintWriter writer, List<> customers) {
-//        String[] CSV_HEADER = { "id", "firstname", "lastname" };
+//    public static void writeDataToCsvUsing
+//
+//    public static void writeDataToCsvUsingStringArray(PrintWriter writer, List<String> headers, List<Object> objectList) {
+//
+//        if (headers.size() != objectList.size()) {
+//            throw new InvalidParameterException();
+//        }
+//
 //        try (
 //                CSVWriter csvWriter = new CSVWriter(writer,
 //                        CSVWriter.DEFAULT_SEPARATOR,
@@ -19,9 +27,9 @@
 //                        CSVWriter.DEFAULT_ESCAPE_CHARACTER,
 //                        CSVWriter.DEFAULT_LINE_END);
 //        ){
-//            csvWriter.writeNext(CSV_HEADER);
+//            csvWriter.writeNext((String[]) headers.toArray());
 //
-//            for (Customer customer : customers) {
+//            for (Object : objectList) {
 //                String[] data = {
 //                        customer.getId().toString(),
 //                        customer.getFirstName(),
@@ -41,24 +49,25 @@
 //    /**
 //     * Way 2
 //     */
-//    public static void writeDataToCsvWithListObjects(PrintWriter writer,List<Customer> customers) {
-//        String[] CSV_HEADER = { "id", "firstname", "lastname" };
-//        StatefulBeanToCsv<Customer> beanToCsv = null;
+//    public static void writeDataToCsvWithListObjects(PrintWriter writer, List<String> headers, List<Object> objectList) {
+//
+//        if (headers.size() != objectList.size()) {
+//            throw new InvalidParameterException();
+//        }
+//        StatefulBeanToCsv<Object> beanToCsv = null;
 //        try (
 //                CSVWriter csvWriter = new CSVWriter(writer,
 //                        CSVWriter.DEFAULT_SEPARATOR,
 //                        CSVWriter.NO_QUOTE_CHARACTER,
 //                        CSVWriter.DEFAULT_ESCAPE_CHARACTER,
 //                        CSVWriter.DEFAULT_LINE_END);
-//        ){
-//            csvWriter.writeNext(CSV_HEADER);
+//        ) {
+//            csvWriter.writeNext((String[]) headers.toArray());
 //
 //            // write List of Objects
-//            ColumnPositionMappingStrategy<Customer> mappingStrategy =
-//                    new ColumnPositionMappingStrategy<Customer>();
-//
-//            mappingStrategy.setType(Customer.class);
-//            mappingStrategy.setColumnMapping(CSV_HEADER);
+//            ColumnPositionMappingStrategy<Object> mappingStrategy = new ColumnPositionMappingStrategy<Object>();
+//            mappingStrategy.setType(Object.class);
+//            mappingStrategy.setColumnMapping(String.valueOf(headers));
 //
 //            beanToCsv = new StatefulBeanToCsvBuilder<Customer>(writer)
 //                    .withMappingStrategy(mappingStrategy)

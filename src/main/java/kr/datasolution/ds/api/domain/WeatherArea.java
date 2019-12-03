@@ -1,12 +1,11 @@
 package kr.datasolution.ds.api.domain;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.joda.time.DateTime;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.List;
+import java.sql.Timestamp;
 
 @Data
 @NoArgsConstructor
@@ -14,9 +13,9 @@ import java.util.List;
 @Table(name = "weather_area_info")
 public class WeatherArea implements Serializable {
 
-    @Id @GeneratedValue
-    @OneToMany(fetch=FetchType.LAZY, mappedBy = "area_code")
-    private List<WeatherDaily> areaCodes;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "area_code")
+    private String areaCode;
 
     @Column(name = "main_name")
     private String mainName;
@@ -61,8 +60,8 @@ public class WeatherArea implements Serializable {
     private String s1AreaCode;
 
     @Column(name = "insert_ddtt")
-    private DateTime insertDdTt;
+    private Timestamp insertDdTt;
 
     @Column(name = "update_ddtt")
-    private DateTime updateDdTt;
+    private Timestamp updateDdTt;
 }

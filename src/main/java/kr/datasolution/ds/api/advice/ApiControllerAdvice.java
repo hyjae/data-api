@@ -2,6 +2,7 @@ package kr.datasolution.ds.api.advice;
 
 import com.google.gson.Gson;
 import kr.datasolution.ds.api.controller.NewsController;
+import kr.datasolution.ds.api.controller.WeatherController;
 import kr.datasolution.ds.api.domain.ApiError;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,8 +21,16 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-@ControllerAdvice(assignableTypes = {NewsController.class})
+@ControllerAdvice(assignableTypes = {NewsController.class, WeatherController.class})
 public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler({IllegalArgumentException.class})
+    public ResponseEntity<?> illegalArgumentExceptionHandler(IllegalArgumentException e) {
+        ApiError apiError = new ApiError(NOT_FOUND);
+        String message = e.getMessage();
+        apiError.setMessage(message);
+        return buildResponseEntity(apiError);
+    }
 
     @ExceptionHandler({ConstraintViolationException.class})
     public ResponseEntity<?> invalidParamsExceptionHandler(ConstraintViolationException e) {

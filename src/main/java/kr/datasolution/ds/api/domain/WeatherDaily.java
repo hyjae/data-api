@@ -1,8 +1,7 @@
 package kr.datasolution.ds.api.domain;
 
 import kr.datasolution.ds.api.util.BigDecimalConverter;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -10,31 +9,29 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
-@NoArgsConstructor
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "weather_daily")
 public class WeatherDaily implements Serializable {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "daily_id")
     private Integer dailyId;
 
     @Column(name = "w_date")
     private Date wDate;
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(foreignKey = @ForeignKey(name = "area_code"))
+    @ManyToOne(fetch = FetchType.LAZY) // TODO:
+    @JoinColumn(name = "area_code")
     private WeatherArea areaCode;
 
     @Column(name = "actual_yn")
     private Integer actualYn;
 
     @Column(name = "w_description")
-    private String WDescription;
+    private String wDescription;
 
     @Column(name = "w_avg_ta")
     @Convert(converter = BigDecimalConverter.class)

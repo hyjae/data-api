@@ -2,52 +2,60 @@ package kr.datasolution.ds.api.repository;
 
 
 import kr.datasolution.ds.api.domain.WeatherArea;
+import kr.datasolution.ds.api.domain.WeatherArea_;
 import kr.datasolution.ds.api.domain.WeatherDaily;
+import kr.datasolution.ds.api.domain.WeatherDaily_;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.Tuple;
 import javax.persistence.criteria.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Metamodel;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static kr.datasolution.ds.api.util.CommonUtils.convertToDate;
 
 @Repository
-public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom  {
+public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom {
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
-    public List<Object> findByColumnName(List<String> columnNames, String from, String to) {
-//        CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
-//        CriteriaQuery<Tuple> cq = cb.createQuery(Tuple.class);
-//
-//        Metamodel m = entityManager.getMetamodel();
-//        EntityType<WeatherDaily> WeatherDaily_ = m.entity(WeatherDaily.class);
+    public List<Tuple> findByColumnName(List<String> columnNames, String from, String to) throws IllegalArgumentException {
+        CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tuple> cq = cb.createQuery(Tuple.class);
+        List<Predicate> predicates = new ArrayList<>();
 
-//        Root<WeatherDaily> weatherDaily = cq.from(WeatherDaily.class);
-//        Join<WeatherDaily, WeatherArea> joinTable = weatherDaily.join(WeatherDaily_.getSet("areaCode", WeatherArea.class));
+        Root<WeatherDaily> weatherDaily = cq.from(WeatherDaily.class);
+        Join<WeatherDaily, WeatherArea> weatherArea = weatherDaily.join(WeatherDaily_.areaCode, JoinType.INNER);
 
-//
-//        List<Selection<?>> s = new LinkedList<>();
-//        columnNames.stream().map(i -> s.add(root.get(i)));
-//        s.add(joinTable.get("area_code"));
-//
-//        List<Predicate> predicates = new ArrayList<>();
-//        predicates.add(cb.between(root.get("date"), from, to));
-//        cq.multiselect(s).where(predicates.toArray(new Predicate[]{}));
-//
-//        List<Object> collect = entityManager.createQuery(cq)
-//                .getResultList()
-//                .stream()
-//                .map(i -> i.get(0))
-//                .collect(Collectors.toList());
-//        return collect;
-        return null;
+        final String dateFormat = "yyyyMMdd";
+        Date fromDate = convertToDate(from, dateFormat);
+        Date toDate = convertToDate(to, dateFormat);
+
+        Predicate fromDatePredicate = cb.greaterThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), fromDate);
+        Predicate toDatePredicate = cb.lessThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), toDate);
+
+        predicates.add(fromDatePredicate);
+        predicates.add(toDatePredicate);
+
+        List<Selection<?>> s = new LinkedList<>();
+
+        s.add(weatherDaily.get(WeatherDaily_.wDate));
+        s.add(weatherArea.get(WeatherArea_.areaCode));
+        s.add(weatherArea.get(WeatherArea_.mainName));
+        s.add(weatherArea.get(WeatherArea_.subName));
+        s.add(weatherArea.get(WeatherArea_.cityName));
+
+        for (String columnName : columnNames)
+            s.add(weatherDaily.get(columnName));
+        cq.multiselect(s).where(predicates.toArray(new Predicate[]{}));
+
+        List<Tuple> resultList = entityManager.createQuery(cq).getResultList();
+        return resultList;
     }
 }
