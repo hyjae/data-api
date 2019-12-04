@@ -123,13 +123,18 @@ public class WeatherDaily implements Serializable {
     @Column(name = "update_ddtt")
     private Timestamp updateDdtt;
 
+    // TODO: func
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         Field[] declaredFields = WeatherDaily.class.getDeclaredFields();
         for (int i = 0; i < declaredFields.length; ++i) {
             try {
                 Object o = declaredFields[i].get(this);
-                stringBuilder.append(o.toString());
+                if (o == null) {
+                    stringBuilder.append("NULL");
+                } else {
+                    stringBuilder.append(o.toString());
+                }
                 if (i != declaredFields.length - 1) {
                     stringBuilder.append(", ");
                 }

@@ -1,11 +1,9 @@
 package kr.datasolution.ds.api.controller;
 
-import com.sun.istack.internal.Nullable;
 import io.swagger.annotations.Api;
 import kr.datasolution.ds.api.domain.WeatherDaily;
 import kr.datasolution.ds.api.repository.WeatherDailyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,10 +13,12 @@ import javax.persistence.Tuple;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static kr.datasolution.ds.api.util.CommonUtils.tupleToCsvFormat;
+import static kr.datasolution.ds.api.util.CommonUtils.tupleToCSVFormat;
 
 @RestController
 @RequestMapping("/weather")
@@ -31,45 +31,51 @@ public class WeatherController {
     @PersistenceContext
     EntityManager entityManager;
 
-    @RequestMapping(value = "/download", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{dataset}/download", method = RequestMethod.GET, produces = "application/json")
     public void getDataDownload(HttpServletResponse response,
-                                @RequestParam List<String> dataTypes,
+                                @PathVariable String dataset,
+                                @RequestParam(value = "format") String format,
                                 @RequestParam(value = "from", required = false) String from,
                                 @RequestParam(value = "to", required = false) String to) throws IOException { // TODO: global exception
-
-        List<Tuple> resultList = weatherDailyRepository.findByColumnName(dataTypes, from, to);
-
+        // TODO: json
         // TODO: header
-        response.addHeader("Content-Type", "application/csv");
-        response.addHeader("Content-Disposition", "attachment; filename=weather.csv");
-        response.setCharacterEncoding("UTF-8");
+        // TODO: func
+        if (format.equalsIgnoreCase("csv")) {
+            ArrayList<String> datasets = new ArrayList<>(Collections.singletonList(dataset));
+            List<Tuple> resultList = weatherDailyRepository.findByColumnName(datasets, from, to);
 
-        PrintWriter out = response.getWriter();
+            response.addHeader("Content-Type", "application/csv");
+            response.addHeader("Content-Disposition", "attachment; filename=weather.csv");
+            response.setCharacterEncoding("UTF-8");
 
-        resultList.forEach(
-                tupleData -> {
-                    out.write(tupleToCsvFormat(tupleData));
-                    out.write("\n");
-                });
-        out.flush();
-        out.close();
+            PrintWriter out = response.getWriter();
+
+            resultList.forEach(
+                    tupleData -> {
+                        out.write(tupleToCSVFormat(tupleData));
+                        out.write("\n");
+                    });
+            out.flush();
+            out.close();
+        }
     }
 
-    @RequestMapping(value = "/{dataType}", method = RequestMethod.GET)
-    public void getMetaData(@PathVariable("dataType") String dataType) {
+    @RequestMapping(value = "/meta", method = RequestMethod.GET)
+    public void getMetaData(@RequestParam("dataType") String dataType) {
         // TODO:
     }
 
-    @RequestMapping(value = "/download", method = RequestMethod.GET)
+    @RequestMapping(value = "/download/full", method = RequestMethod.GET)
     @Transactional(readOnly = true) // TODO: ?
     public void downloadFullCSV(HttpServletResponse response,
+                                @RequestParam(value = "format", required = false) String format,
                                 @RequestParam(value = "from", required = false) String from, // TODO : exception
                                 @RequestParam(value = "to", required = false) String to) throws IOException {
         // TODO: header
         response.addHeader("Content-Type", "application/csv");
         response.addHeader("Content-Disposition", "attachment; filename=weather.csv");
         response.setCharacterEncoding("UTF-8");
-        
+
         Stream<WeatherDaily> weatherDailyStream = weatherDailyRepository.getAllBetween(from, to);
 
         PrintWriter out = response.getWriter();

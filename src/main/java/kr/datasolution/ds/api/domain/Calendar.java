@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.lang.reflect.Field;
 import java.sql.Timestamp;
 
 @NoArgsConstructor
@@ -105,4 +106,26 @@ public class Calendar {
 
     @Column(name = "update_ddtt")
     Timestamp updateDdtt;
+
+    // TODO: func
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        Field[] declaredFields = Calendar.class.getDeclaredFields();
+        for (int i = 0; i < declaredFields.length; ++i) {
+            try {
+                Object o = declaredFields[i].get(this);
+                if (o == null) {
+                    stringBuilder.append("NULL");
+                } else {
+                    stringBuilder.append(o.toString());
+                }
+                if (i != declaredFields.length - 1) {
+                    stringBuilder.append(", ");
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace(); // TODO: program exception
+            }
+        }
+        return stringBuilder.toString();
+    }
 }
