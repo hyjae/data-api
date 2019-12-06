@@ -1,10 +1,14 @@
 package kr.datasolution.ds.api.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import kr.datasolution.ds.api.domain.Calendar;
+import kr.datasolution.ds.api.domain.TimePoint;
 import kr.datasolution.ds.api.repository.CalendarRepository;
 import kr.datasolution.ds.api.util.CommonUtils;
 import kr.datasolution.ds.api.util.ReflectionUtils;
+import kr.datasolution.ds.api.validator.DateRequestParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -35,13 +39,16 @@ public class CalendarController {
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     @Transactional(readOnly = true)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
+    })
     public void downloadFullCSV(HttpServletResponse response,
-                                @RequestParam(value = "from", required = false) String from,
-                                @RequestParam(value = "to", required = false) String to,
-                                @RequestParam(value = "format", required = false, defaultValue = "csv") String format) throws IOException {
+                                @DateRequestParam(point = TimePoint.FROM) String from,
+                                @DateRequestParam(point = TimePoint.TO) String to,
+                                @RequestParam(defaultValue = "csv") String format) throws IOException {
         if (format.equalsIgnoreCase("csv")) {
             // TODO: func
-            // TODO: header
             // TODO: json
             response.addHeader("Content-Type", "application/csv");
             response.addHeader("Content-Disposition", "attachment; filename=calendar.csv");
@@ -49,9 +56,9 @@ public class CalendarController {
 
             Stream<Calendar> calendarStream = calendarRepository.getAllBetween(from, to);
 
-            List<String> tableColumnNames = ReflectionUtils.getTableColumnNames(Calendar.class);
+            List<String> columnNames = ReflectionUtils.getColumnNames(Calendar.class);
             PrintWriter out = response.getWriter();
-            out.write(CommonUtils.listToCSVFormat(tableColumnNames));
+            out.write(CommonUtils.listToCSVFormat(columnNames));
             out.write("\n");
             calendarStream.forEach(
                     calendar -> {

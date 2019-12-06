@@ -8,7 +8,7 @@ import java.util.List;
 public class ReflectionUtils {
 
     // TODO: without @Column?
-    public static List<String> getTableColumnNames(Class clazz)
+    public static List<String> getColumnNames(Class clazz)
     {
         List<String> Columns = new ArrayList<>();
         Field[] fields = clazz.getDeclaredFields();

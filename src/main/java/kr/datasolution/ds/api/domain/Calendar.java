@@ -56,7 +56,7 @@ public class Calendar {
     @Column(name = "lun_secha")
     String lunSecha;
 
-    @Column(name = "lun_wongeon")
+    @Column(name = "lun_wolgeon")
     String lunWolgeon;
 
     @Column(name = "lun_iljin")

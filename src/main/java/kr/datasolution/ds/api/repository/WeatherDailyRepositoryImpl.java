@@ -5,6 +5,7 @@ import kr.datasolution.ds.api.domain.WeatherArea;
 import kr.datasolution.ds.api.domain.WeatherArea_;
 import kr.datasolution.ds.api.domain.WeatherDaily;
 import kr.datasolution.ds.api.domain.WeatherDaily_;
+import org.apache.commons.text.CaseUtils;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.Tuple;
@@ -52,7 +53,7 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
         s.add(weatherArea.get(WeatherArea_.cityName));
 
         for (String columnName : columnNames)
-            s.add(weatherDaily.get(columnName));
+            s.add(weatherDaily.get(CaseUtils.toCamelCase(columnName, false, '_')));
         cq.multiselect(s).where(predicates.toArray(new Predicate[]{}));
 
         List<Tuple> resultList = entityManager.createQuery(cq).getResultList();

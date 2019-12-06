@@ -3,7 +3,6 @@ package kr.datasolution.ds.api.util;
 import javax.persistence.Tuple;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -51,5 +50,30 @@ public class CommonUtils {
                 row.append(", ");
         }
         return row.toString();
+    }
+
+    public static boolean isValidDateFormat(String dateFormat, String date) {
+        final int length = dateFormat.length();
+        if (!isNumeric(date) || (date.length() != length))
+            return false;
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
+        try {
+            Date parse = simpleDateFormat.parse(date);
+            return true;
+        } catch (ParseException e) {
+            return false;
+        }
+    }
+
+    private static boolean isNumeric(String strNum) {
+        if (strNum == null)
+            return false;
+        try {
+            double d = Double.parseDouble(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
     }
 }

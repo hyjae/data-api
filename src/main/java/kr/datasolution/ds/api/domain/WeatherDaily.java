@@ -34,42 +34,42 @@ public class WeatherDaily implements Serializable {
     private String wDescription;
 
     @Column(name = "w_avg_ta")
-    @Convert(converter = BigDecimalConverter.class)
+//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wAvgTa;
 
     @Column(name = "w_max_ta")
-    @Convert(converter = BigDecimalConverter.class)
+//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wMaxTa;
 
     @Column(name = "w_min_ta")
-    @Convert(converter = BigDecimalConverter.class)
+//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wMinTa;
 
     @Column(name = "w_prob_rn")
-    @Convert(converter = BigDecimalConverter.class)
+//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wProbRn;
 
     @Column(name = "w_sum_rn")
-    @Convert(converter = BigDecimalConverter.class)
+//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wSumRn;
 
     @Column(name = "w_dd_mefs")
-    @Convert(converter = BigDecimalConverter.class)
+//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wDdMefs;
 
     @Column(name = "w_max_wd")
     private Integer wMaxWd;
 
     @Column(name = "w_avg_ws")
-    @Convert(converter = BigDecimalConverter.class)
+//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wAvgWs;
 
     @Column(name = "w_avg_rhm")
-    @Convert(converter = BigDecimalConverter.class)
+//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wAvgRhm;
 
     @Column(name = "w_avg_tca")
-    @Convert(converter = BigDecimalConverter.class)
+//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wAvgTca;
 
     @Column(name = "a_pm10")
@@ -123,25 +123,28 @@ public class WeatherDaily implements Serializable {
     @Column(name = "update_ddtt")
     private Timestamp updateDdtt;
 
-    // TODO: func
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder text = new StringBuilder();
         Field[] declaredFields = WeatherDaily.class.getDeclaredFields();
-        for (int i = 0; i < declaredFields.length; ++i) {
+
+        for (int i = 1; i < declaredFields.length; ++i) { // skip index
             try {
                 Object o = declaredFields[i].get(this);
                 if (o == null) {
-                    stringBuilder.append("NULL");
+                    text.append("NULL");
+                } else if (o instanceof WeatherArea) {
+                    text.append(((WeatherArea) o).toCSVFormat());
                 } else {
-                    stringBuilder.append(o.toString());
+                    text.append(o.toString());
                 }
                 if (i != declaredFields.length - 1) {
-                    stringBuilder.append(", ");
+                    text.append(", ");
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace(); // TODO: program exception
             }
         }
-        return stringBuilder.toString();
+        return text.toString();
     }
 }
+

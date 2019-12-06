@@ -1,7 +1,6 @@
 package kr.datasolution.ds.api.domain;
 
 import lombok.*;
-import org.joda.time.DateTime;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -64,4 +63,9 @@ public class WeatherArea implements Serializable {
 
     @Column(name = "update_ddtt")
     private Timestamp updateDdTt;
+
+    // TODO: naming
+    public String toCSVFormat() {
+        return this.getAreaCode() + ", " + this.getMainName() + ", " + this.getSubName() + ", " + this.getCityName();
+    }
 }
