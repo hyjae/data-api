@@ -6,7 +6,8 @@ import io.swagger.annotations.ApiImplicitParams;
 import kr.datasolution.ds.api.domain.Calendar;
 import kr.datasolution.ds.api.domain.TimePoint;
 import kr.datasolution.ds.api.repository.CalendarRepository;
-import kr.datasolution.ds.api.util.CommonUtils;
+import kr.datasolution.ds.api.repository.CalendarWithSelectedColumns;
+import kr.datasolution.ds.api.util.RestApiCSVWriter;
 import kr.datasolution.ds.api.util.ReflectionUtils;
 import kr.datasolution.ds.api.validator.DateRequestParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/calendar")
@@ -47,27 +47,42 @@ public class CalendarController {
                                 @DateRequestParam(point = TimePoint.FROM) String from,
                                 @DateRequestParam(point = TimePoint.TO) String to,
                                 @RequestParam(defaultValue = "csv") String format) throws IOException {
-        if (format.equalsIgnoreCase("csv")) {
-            // TODO: func
-            // TODO: json
-            response.addHeader("Content-Type", "application/csv");
-            response.addHeader("Content-Disposition", "attachment; filename=calendar.csv");
-            response.setCharacterEncoding("UTF-8");
-
-            Stream<Calendar> calendarStream = calendarRepository.getAllBetween(from, to);
-
+        if (format.equalsIgnoreCase("json")) {
+            // TODO:
+        } else {
+            RestApiCSVWriter csvWriter = new RestApiCSVWriter("calendar.csv", response);
+            Collection<CalendarWithSelectedColumns> calendarStream = calendarRepository.getAllBetween(from, to);
             List<String> columnNames = ReflectionUtils.getColumnNames(Calendar.class);
-            PrintWriter out = response.getWriter();
-            out.write(CommonUtils.listToCSVFormat(columnNames));
-            out.write("\n");
-            calendarStream.forEach(
-                    calendar -> {
-                        out.write(calendar.toString());
-                        out.write("\n");
-                        entityManager.detach(calendar);
-                    });
-            out.flush();
-            out.close();
+//            csvWriter.buildCSVDocument(calendarStream, columnNames);
         }
     }
+
+
+//    public void downloadFullCSV(HttpServletResponse response,
+//                                @DateRequestParam(point = TimePoint.FROM) String from,
+//                                @DateRequestParam(point = TimePoint.TO) String to,
+//                                @RequestParam(defaultValue = "csv") String format) throws IOException {
+//        if (format.equalsIgnoreCase("csv")) {
+//            // TODO: func
+//            // TODO: json
+//            response.addHeader("Content-Type", "application/csv");
+//            response.addHeader("Content-Disposition", "attachment; filename=calendar.csv");
+//            response.setCharacterEncoding("UTF-8");
+//
+//            Stream<Calendar> calendarStream = calendarRepository.getAllBetween(from, to);
+//
+//            List<String> columnNames = ReflectionUtils.getColumnNames(Calendar.class);
+//            PrintWriter out = response.getWriter();
+//            out.write(CommonUtils.listToCSVFormat(columnNames));
+//            out.write("\n");
+//            calendarStream.forEach(
+//                    calendar -> {
+//                        out.write(calendar.toString());
+//                        out.write("\n");
+//                        entityManager.detach(calendar);
+//                    });
+//            out.flush();
+//            out.close();
+//        }
+//    }
 }
