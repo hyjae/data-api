@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 
-public abstract class AbstractRestApiCSVWriter {
+public abstract class AbstractHttpResponseWriter {
 
     HttpServletResponse httpServletResponse;
 
@@ -23,7 +23,9 @@ public abstract class AbstractRestApiCSVWriter {
         return httpServletResponse;
     }
 
-    protected abstract void buildCSVDocument(Stream<?> streamList, List<String> headers) throws IOException;
-
-    protected abstract void buildCSVDocument(List<?> streamList, List<String> headers) throws IOException;
+//    protected abstract void buildCSVDocument(Stream<?> streamList, List<String> headers) throws IOException;
+//
+//    protected abstract void buildCSVDocumentWithCSVFormat(Stream<?> streamList, List<String> headers) throws IOException;
+//
+//    protected abstract void buildCSVDocument(List<?> streamList, List<String> headers) throws IOException;
 }

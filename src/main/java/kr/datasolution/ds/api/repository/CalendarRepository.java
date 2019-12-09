@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.QueryHint;
-import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.hibernate.annotations.QueryHints.READ_ONLY;
@@ -16,14 +16,16 @@ import static org.hibernate.jpa.QueryHints.HINT_FETCH_SIZE;
 
 @Repository
 public interface CalendarRepository extends JpaRepository<Calendar, Long>, CalendarRepositoryCustom {
-//
-//    @QueryHints(value = {
-//            @QueryHint(name = HINT_FETCH_SIZE, value = "" + Integer.MIN_VALUE),
-//            @QueryHint(name = HINT_CACHEABLE, value = "false"),
-//            @QueryHint(name = READ_ONLY, value = "true")
-//    })
-//    @Query(value = "SELECT * FROM calendar WHERE sol_ymd between ?1 and ?2", nativeQuery = true)
-//    Stream<Calendar> getAllBetween(String fromDate, String toDate);
 
-    Collection<CalendarWithSelectedColumns> getAllBetween(String fromDate, String toDate);
+    @QueryHints(value = {
+            @QueryHint(name = HINT_FETCH_SIZE, value = "" + Integer.MIN_VALUE),
+            @QueryHint(name = HINT_CACHEABLE, value = "false"),
+            @QueryHint(name = READ_ONLY, value = "true")
+    })
+    @Query(value = "SELECT * FROM calendar WHERE sol_ymd between ?1 and ?2", nativeQuery = true)
+    Stream<Calendar> findBySolYmdBetweenStream(String fromDate, String toDate);
+
+    <T> List<T> findBySolYmdBetween(String fromDate, String toDate, Class<T> type);
+
+    List<CalendarCustomView> findBySolYmdBetween(String fromDate, String toDate);
 }
