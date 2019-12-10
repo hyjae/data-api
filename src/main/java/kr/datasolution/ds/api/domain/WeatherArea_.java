@@ -1,11 +1,11 @@
 package kr.datasolution.ds.api.domain;
 
-import org.joda.time.DateTime;
 
 import javax.annotation.Generated;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Generated(value = "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor")
@@ -26,8 +26,8 @@ public class WeatherArea_ {
     public static volatile SingularAttribute<WeatherArea, String> a1SiDoNameResp;
     public static volatile SingularAttribute<WeatherArea, String> a2SiDoNameResp;
     public static volatile SingularAttribute<WeatherArea, String> s1AreaCode;
-    public static volatile SingularAttribute<WeatherArea, DateTime> insertDdTt;
-    public static volatile SingularAttribute<WeatherArea, DateTime> updateDdTt;
+    public static volatile SingularAttribute<WeatherArea, Timestamp> insertDdTt;
+    public static volatile SingularAttribute<WeatherArea, Timestamp> updateDdTt;
 
     public String convertToWeatherAreaMetamodel(List<String> colNames) {
         StringBuilder stringBuilder = new StringBuilder();

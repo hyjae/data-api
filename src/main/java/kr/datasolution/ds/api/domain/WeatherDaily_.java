@@ -3,15 +3,19 @@ package kr.datasolution.ds.api.domain;
 import javax.annotation.Generated;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.security.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Generated(value = "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor")
 @StaticMetamodel(WeatherDaily.class)
 public class WeatherDaily_ {
     public static volatile SingularAttribute<WeatherDaily, Integer> dailyId;
-    public static volatile SingularAttribute<WeatherDaily, Date> wDate;
+    public static volatile SingularAttribute<WeatherDaily, String> wDate;
     public static volatile SingularAttribute<WeatherDaily, WeatherArea> areaCode;
     public static volatile SingularAttribute<WeatherDaily, Integer> actualYn;
     public static volatile SingularAttribute<WeatherDaily, String> WDescription;
@@ -42,4 +46,19 @@ public class WeatherDaily_ {
     public static volatile SingularAttribute<WeatherDaily, Integer> s12Hheat;
     public static volatile SingularAttribute<WeatherDaily, Timestamp> insertDdtt;
     public static volatile SingularAttribute<WeatherDaily, Timestamp> updateDdtt;
+
+    public List<SingularAttribute> getAllAttributesButAreaCode() {
+        Field[] declaredFields = WeatherDaily_.class.getDeclaredFields();
+        List<Field> collect = Arrays.stream(declaredFields).collect(Collectors.toList());
+        collect.forEach(
+                element -> {
+                    try {
+                        Object o = element.get(this);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+        );
+        return null;
+    }
 }

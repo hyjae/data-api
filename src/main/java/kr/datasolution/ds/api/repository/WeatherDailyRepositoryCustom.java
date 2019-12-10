@@ -7,5 +7,7 @@ import java.util.List;
 
 @Repository
 public interface WeatherDailyRepositoryCustom {
-    List<Tuple> findByColumnName(List<String> columnNames, String from, String to);
+    List<Tuple> findByColumnNameAndByWDateBetweenAndByAreaCode(List<String> columnNames, String from, String to, Integer[] areaCode);
+
+    List<Tuple> findByWDateBetweenAndByAreaCode(String from, String to, Integer[] areaCode);
 }

@@ -1,6 +1,6 @@
 package kr.datasolution.ds.api.domain;
 
-import kr.datasolution.ds.api.util.BigDecimalConverter;
+import kr.datasolution.ds.api.util.DateFormatConverter;
 import lombok.*;
 
 import javax.persistence.*;
@@ -8,6 +8,8 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Data
@@ -21,9 +23,9 @@ public class WeatherDaily implements Serializable {
     private Integer dailyId;
 
     @Column(name = "w_date")
-    private Date wDate;
+    private String wDate;
 
-    @ManyToOne(fetch = FetchType.LAZY) // TODO:
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "area_code")
     private WeatherArea areaCode;
 
@@ -34,42 +36,33 @@ public class WeatherDaily implements Serializable {
     private String wDescription;
 
     @Column(name = "w_avg_ta")
-//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wAvgTa;
 
     @Column(name = "w_max_ta")
-//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wMaxTa;
 
     @Column(name = "w_min_ta")
-//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wMinTa;
 
     @Column(name = "w_prob_rn")
-//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wProbRn;
 
     @Column(name = "w_sum_rn")
-//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wSumRn;
 
     @Column(name = "w_dd_mefs")
-//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wDdMefs;
 
     @Column(name = "w_max_wd")
     private Integer wMaxWd;
 
     @Column(name = "w_avg_ws")
-//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wAvgWs;
 
     @Column(name = "w_avg_rhm")
-//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wAvgRhm;
 
     @Column(name = "w_avg_tca")
-//    @Convert(converter = BigDecimalConverter.class)
     private BigDecimal wAvgTca;
 
     @Column(name = "a_pm10")
@@ -132,6 +125,10 @@ public class WeatherDaily implements Serializable {
                 Object o = declaredFields[i].get(this);
                 if (o == null) {
                     text.append("NULL");
+                } else if (o instanceof Date) {
+                    Format formatter = new SimpleDateFormat("yyyyMMdd");
+                    String dateFormatString = formatter.format(o);
+                    text.append(dateFormatString);
                 } else if (o instanceof WeatherArea) {
                     text.append(((WeatherArea) o).toCSVFormat());
                 } else {

@@ -8,19 +8,20 @@ import java.util.List;
 
 public class HttpResponseCSVWriter extends AbstractHttpResponseWriter {
 
+    private PrintWriter writer;
+
     public HttpResponseCSVWriter(String fileName, HttpServletResponse httpServletResponse) {
         this.setFileName(httpServletResponse, fileName);
     }
 
     public void setHeaders(List<String> headers) throws IOException {
-        PrintWriter writer = this.httpServletResponse.getWriter();
-        writer.write(CommonUtils.listToCSVFormat(headers));
-        writer.write("\n");
+        this.writer = this.httpServletResponse.getWriter();
+        this.writer.write(CommonUtils.listToCSVFormat(headers));
+        this.writer.write("\n");
     }
 
     public void write(String row) {
-        this.write(row);
-        this.write("\n");
+        this.writer.write(row + "\n");
     }
 
     public void close() {

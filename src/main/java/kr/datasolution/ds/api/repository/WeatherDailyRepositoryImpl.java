@@ -6,16 +6,16 @@ import kr.datasolution.ds.api.domain.WeatherArea_;
 import kr.datasolution.ds.api.domain.WeatherDaily;
 import kr.datasolution.ds.api.domain.WeatherDaily_;
 import org.apache.commons.text.CaseUtils;
+import org.hibernate.jpa.internal.metamodel.SingularAttributeImpl;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.Tuple;
 import javax.persistence.criteria.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
+import java.util.*;
 
 import static kr.datasolution.ds.api.util.CommonUtils.convertToDate;
 
@@ -26,7 +26,8 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
     private EntityManager entityManager;
 
     @Override
-    public List<Tuple> findByColumnName(List<String> columnNames, String from, String to) throws IllegalArgumentException {
+    public List<Tuple> findByColumnNameAndByWDateBetweenAndByAreaCode(
+            List<String> columnNames, String from, String to, Integer[] areaCode) throws IllegalArgumentException {
         CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
         CriteriaQuery<Tuple> cq = cb.createQuery(Tuple.class);
         List<Predicate> predicates = new ArrayList<>();
@@ -41,6 +42,57 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
         Predicate fromDatePredicate = cb.greaterThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), fromDate);
         Predicate toDatePredicate = cb.lessThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), toDate);
 
+        List<Predicate> areaRangePredicateList = new ArrayList<>();
+        for (Integer code : areaCode) {
+            Integer fromRange = Integer.valueOf(code + "00");
+            Integer toRange = Integer.valueOf(code + "99");
+            Predicate areaCodeFromPredicate = cb.greaterThanOrEqualTo(weatherDaily.get("areaCode"), fromRange);
+            Predicate areaCodeToPredicate = cb.lessThanOrEqualTo(weatherDaily.get("areaCode"), toRange);
+            areaRangePredicateList.add(cb.and(areaCodeFromPredicate, areaCodeToPredicate));
+        }
+        predicates.add(cb.or(areaRangePredicateList.toArray(new Predicate[0])));
+        predicates.add(fromDatePredicate);
+        predicates.add(toDatePredicate);
+
+        List<Selection<?>> s = new LinkedList<>();
+        s.add(weatherDaily.get(WeatherDaily_.wDate));
+        s.add(weatherArea.get(WeatherArea_.areaCode));
+        s.add(weatherArea.get(WeatherArea_.mainName));
+        s.add(weatherArea.get(WeatherArea_.subName));
+        s.add(weatherArea.get(WeatherArea_.cityName));
+
+        for (String columnName : columnNames)
+            s.add(weatherDaily.get(CaseUtils.toCamelCase(columnName, false, '_')));
+        cq.multiselect(s).where(predicates.toArray(new Predicate[]{}));
+        return entityManager.createQuery(cq).getResultList();
+    }
+
+    @Override
+    public List<Tuple> findByWDateBetweenAndByAreaCode(String from, String to, Integer[] areaCode) {
+        CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tuple> cq = cb.createQuery(Tuple.class);
+        List<Predicate> predicates = new ArrayList<>();
+
+        Root<WeatherDaily> weatherDaily = cq.from(WeatherDaily.class);
+        Join<WeatherDaily, WeatherArea> weatherArea = weatherDaily.join(WeatherDaily_.areaCode, JoinType.INNER);
+
+        final String dateFormat = "yyyyMMdd";
+        Date fromDate = convertToDate(from, dateFormat);
+        Date toDate = convertToDate(to, dateFormat);
+
+        Predicate fromDatePredicate = cb.greaterThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), fromDate);
+        Predicate toDatePredicate = cb.lessThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), toDate);
+
+        List<Predicate> areaRangePredicateList = new ArrayList<>();
+        for (Integer code : areaCode) {
+            Integer fromRange = Integer.valueOf(code + "00");
+            Integer toRange = Integer.valueOf(code + "99");
+            Predicate areaCodeFromPredicate = cb.greaterThanOrEqualTo(weatherDaily.get("areaCode"), fromRange);
+            Predicate areaCodeToPredicate = cb.lessThanOrEqualTo(weatherDaily.get("areaCode"), toRange);
+            areaRangePredicateList.add(cb.and(areaCodeFromPredicate, areaCodeToPredicate));
+        }
+        predicates.add(cb.or(areaRangePredicateList.toArray(new Predicate[0])));
+
         predicates.add(fromDatePredicate);
         predicates.add(toDatePredicate);
 
@@ -52,11 +104,14 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
         s.add(weatherArea.get(WeatherArea_.subName));
         s.add(weatherArea.get(WeatherArea_.cityName));
 
-        for (String columnName : columnNames)
-            s.add(weatherDaily.get(CaseUtils.toCamelCase(columnName, false, '_')));
-        cq.multiselect(s).where(predicates.toArray(new Predicate[]{}));
+        EntityType<WeatherDaily> model = weatherDaily.getModel();
 
-        List<Tuple> resultList = entityManager.createQuery(cq).getResultList();
-        return resultList;
+        for (Attribute<WeatherDaily, ?> singularAttribute : model.getDeclaredAttributes()) {
+            String attributeName = singularAttribute.getName();
+            if (!attributeName.equalsIgnoreCase("wDate"))
+                s.add(weatherDaily.get(attributeName));
+        }
+        cq.multiselect(s).where(predicates.toArray(new Predicate[]{}));
+        return entityManager.createQuery(cq).getResultList();
     }
 }

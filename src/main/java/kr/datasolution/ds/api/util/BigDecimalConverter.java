@@ -8,8 +8,8 @@ import java.math.BigDecimal;
 public class BigDecimalConverter implements AttributeConverter<BigDecimal, Long> {
     /**
      * https://stackoverflow.com/questions/47703481/jpa-save-bigdecimal-as-integer-in-database
-     * @param value
-     * @return
+     * @param value BigDecimal
+     * @return Long
      */
 
     @Override

@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import kr.datasolution.ds.api.domain.*;
 import kr.datasolution.ds.api.repository.WeatherDailyRepository;
-import kr.datasolution.ds.api.util.CommonUtils;
+import kr.datasolution.ds.api.util.HttpResponseCSVWriter;
 import kr.datasolution.ds.api.util.ReflectionUtils;
 import kr.datasolution.ds.api.validator.DateRequestParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +17,10 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Tuple;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static kr.datasolution.ds.api.util.CommonUtils.tupleToCSVFormat;
 
@@ -31,11 +29,14 @@ import static kr.datasolution.ds.api.util.CommonUtils.tupleToCSVFormat;
 @Api("/weather")
 public class WeatherController {
 
-    @Autowired
-    WeatherDailyRepository weatherDailyRepository;
-
     @PersistenceContext
     EntityManager entityManager;
+
+    final WeatherDailyRepository weatherDailyRepository;
+
+    public WeatherController(WeatherDailyRepository weatherDailyRepository) {
+        this.weatherDailyRepository = weatherDailyRepository;
+    }
 
     @RequestMapping(value = "/{dataset}/download", method = RequestMethod.GET, produces = "application/json")
     @ApiImplicitParams({
@@ -46,38 +47,22 @@ public class WeatherController {
                                 @PathVariable String dataset,
                                 @RequestParam(required = false, defaultValue = "csv") String format,
                                 @DateRequestParam(point = TimePoint.FROM) String from,
-                                @DateRequestParam(point = TimePoint.TO) String to) throws IOException {
-        // TODO: global exception
-        // TODO: json
-        // TODO: func
+                                @DateRequestParam(point = TimePoint.TO) String to,
+                                @RequestParam(required = false) Integer[] area_code) throws IOException {
+
+        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("weather.csv", response);
+
         String datasetName = dataset.replace("-", "_");
-        List<String> colNames = Arrays.asList("w_date", "area_code", "main_name", "sub_name", "city_name", datasetName);
+        List<String> columnNames = Arrays.asList("w_date", "area_code", "main_name", "sub_name", "city_name", datasetName);
+        httpResponseCsvWriter.setHeaders(columnNames);
 
-        if (format.equalsIgnoreCase("csv")) {
-            ArrayList<String> datasets = new ArrayList<>(Collections.singletonList(datasetName));
-            List<Tuple> resultList = weatherDailyRepository.findByColumnName(datasets, from, to);
-
-            response.addHeader("Content-Type", "application/csv");
-            response.addHeader("Content-Disposition", "attachment; filename=weather.csv");
-            response.setCharacterEncoding("UTF-8");
-
-            PrintWriter out = response.getWriter();
-            out.write(CommonUtils.listToCSVFormat(colNames));
-            out.write("\n");
-            resultList.forEach(
-                    tupleData -> {
-                        out.write(tupleToCSVFormat(tupleData));
-                        out.write("\n");
-//                        entityManager.detach(tupleData); // TODO: ?
-                    });
-            out.flush();
-            out.close();
-        }
-    }
-
-    @RequestMapping(value = "/meta", method = RequestMethod.GET)
-    public void getMetaData(@RequestParam("dataType") String dataType) {
-        // TODO:
+        // TODO: area_code validity check
+        ArrayList<String> datasets = new ArrayList<>(Collections.singletonList(datasetName));
+        List<Tuple> resultList = weatherDailyRepository.findByColumnNameAndByWDateBetweenAndByAreaCode(datasets, from, to, area_code);
+        resultList.forEach(
+                element -> httpResponseCsvWriter.write(tupleToCSVFormat(element))
+        );
+        httpResponseCsvWriter.close();
     }
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
@@ -89,32 +74,28 @@ public class WeatherController {
     public void downloadFullCSV(HttpServletResponse response,
                                 @RequestParam(required = false, defaultValue = "csv") String format,
                                 @DateRequestParam(point = TimePoint.FROM) String from,
-                                @DateRequestParam(point = TimePoint.TO) String to) throws IOException {
-        if (format.equalsIgnoreCase("csv")) {
-            response.addHeader("Content-Type", "application/csv");
-            response.addHeader("Content-Disposition", "attachment; filename=weather.csv");
-            response.setCharacterEncoding("UTF-8");
+                                @DateRequestParam(point = TimePoint.TO) String to,
+                                @RequestParam(required = false) Integer[] areaCode) throws IOException {
+        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("weather.csv", response);
 
-            Stream<WeatherDaily> weatherDailyStream = weatherDailyRepository.getAllBetween(from, to);
+        // TODO: bug @Column
+        List<String> columnNames = ReflectionUtils.getColumnNames(WeatherDaily.class);
+        columnNames.remove(0); // delete idx
+        columnNames.add(1, "area_code");
+        columnNames.add(2, "main_name");
+        columnNames.add(3, "sub_name");
+        columnNames.add(4, "city_name");
+        httpResponseCsvWriter.setHeaders(columnNames);
 
-            List<String> tableColumnNames = ReflectionUtils.getColumnNames(WeatherDaily.class); // TODO: bug @Column
-            tableColumnNames.remove(0); // delete idx
-            tableColumnNames.add(1, "area_code");
-            tableColumnNames.add(2, "main_name");
-            tableColumnNames.add(3, "sub_name");
-            tableColumnNames.add(4, "city_name");
+        // TODO: area_code validity check
+        List<Tuple> weatherDailyStream = weatherDailyRepository.findByWDateBetweenAndByAreaCode(from, to, areaCode);
+        weatherDailyStream.forEach(
+                element -> httpResponseCsvWriter.write(tupleToCSVFormat(element))
+        );
+    }
 
-            PrintWriter out = response.getWriter();
-            out.write(CommonUtils.listToCSVFormat(tableColumnNames));
-            out.write("\n");
-            weatherDailyStream.forEach(
-                    weatherDaily -> {
-                        out.write(weatherDaily.toString());
-                        out.write("\n");
-                        entityManager.detach(weatherDaily);
-                    });
-            out.flush();
-            out.close();
-        }
+    @RequestMapping(value = "/meta", method = RequestMethod.GET)
+    public void getMetaData(@RequestParam("dataType") String dataType) {
+        // TODO:
     }
 }

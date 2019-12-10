@@ -18,10 +18,10 @@ import static org.hibernate.jpa.QueryHints.HINT_FETCH_SIZE;
 public interface WeatherDailyRepository extends JpaRepository<WeatherDaily, Long>, WeatherDailyRepositoryCustom {
 
     @QueryHints(value = {
-//            @QueryHint(name = HINT_FETCH_SIZE, value = "" + Integer.MIN_VALUE),
+            @QueryHint(name = HINT_FETCH_SIZE, value = "" + Integer.MIN_VALUE), // TODO: test
             @QueryHint(name = HINT_CACHEABLE, value = "false"),
             @QueryHint(name = READ_ONLY, value = "true")
     })
     @Query(value = "SELECT * FROM weather_daily WHERE w_date between ?1 and ?2", nativeQuery = true)
-    Stream<WeatherDaily> getAllBetween(String fromDate, String toDate);
+    Stream<WeatherDaily> findByWDateBetween(String fromDate, String toDate);
 }
