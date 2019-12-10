@@ -22,6 +22,16 @@ public class ReflectionUtils {
         return Columns;
     }
 
+    public static List<String> getValNames(Class clazz)
+    {
+        List<String> Columns = new ArrayList<>();
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            Columns.add(field.getName());
+        }
+        return Columns;
+    }
+
     public static String objectToCSVFormat(Object object) {
         return objectToCSVFormatHelper(object) + "\n";
     }

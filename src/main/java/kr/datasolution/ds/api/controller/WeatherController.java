@@ -48,7 +48,7 @@ public class WeatherController {
                                 @RequestParam(required = false, defaultValue = "csv") String format,
                                 @DateRequestParam(point = TimePoint.FROM) String from,
                                 @DateRequestParam(point = TimePoint.TO) String to,
-                                @RequestParam(required = false) Integer[] area_code) throws IOException {
+                                @RequestParam(required = false) Integer[] area_code) throws IOException, IllegalArgumentException {
 
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("weather.csv", response);
 
@@ -85,6 +85,8 @@ public class WeatherController {
         columnNames.add(2, "main_name");
         columnNames.add(3, "sub_name");
         columnNames.add(4, "city_name");
+        columnNames.remove(columnNames.size()-1);
+        columnNames.remove(columnNames.size()-1);
         httpResponseCsvWriter.setHeaders(columnNames);
 
         // TODO: area_code validity check

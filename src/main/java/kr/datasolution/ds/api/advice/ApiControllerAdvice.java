@@ -4,7 +4,10 @@ import com.google.gson.Gson;
 import kr.datasolution.ds.api.controller.NewsController;
 import kr.datasolution.ds.api.controller.WeatherController;
 import kr.datasolution.ds.api.domain.ApiError;
+import kr.datasolution.ds.api.repository.WeatherDailyRepositoryCustom;
+import kr.datasolution.ds.api.repository.WeatherDailyRepositoryImpl;
 import kr.datasolution.ds.api.validator.DateHandlerResolver;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +25,24 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-@ControllerAdvice(assignableTypes = {NewsController.class, WeatherController.class, DateHandlerResolver.class})
+@ControllerAdvice(assignableTypes = {NewsController.class, WeatherController.class, DateHandlerResolver.class, WeatherDailyRepositoryImpl.class})
 public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler({IllegalStateException.class})
+    public ResponseEntity<?> illegalStateExceptionHandler(IllegalStateException e) {
+        ApiError apiError = new ApiError(NOT_FOUND);
+        String message = e.getMessage();
+        apiError.setMessage(message);
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler({InvalidDataAccessApiUsageException.class})
+    public ResponseEntity<?> illegalArgumentExceptionHandler(InvalidDataAccessApiUsageException e) {
+        ApiError apiError = new ApiError(NOT_FOUND);
+        String message = e.getMessage();
+        apiError.setMessage(message);
+        return buildResponseEntity(apiError);
+    }
 
     @ExceptionHandler({IllegalArgumentException.class})
     public ResponseEntity<?> illegalArgumentExceptionHandler(IllegalArgumentException e) {

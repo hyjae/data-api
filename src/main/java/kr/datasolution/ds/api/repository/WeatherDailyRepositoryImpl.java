@@ -5,15 +5,14 @@ import kr.datasolution.ds.api.domain.WeatherArea;
 import kr.datasolution.ds.api.domain.WeatherArea_;
 import kr.datasolution.ds.api.domain.WeatherDaily;
 import kr.datasolution.ds.api.domain.WeatherDaily_;
+import kr.datasolution.ds.api.util.ReflectionUtils;
 import org.apache.commons.text.CaseUtils;
-import org.hibernate.jpa.internal.metamodel.SingularAttributeImpl;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.Tuple;
 import javax.persistence.criteria.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import java.util.*;
 
@@ -27,7 +26,7 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
 
     @Override
     public List<Tuple> findByColumnNameAndByWDateBetweenAndByAreaCode(
-            List<String> columnNames, String from, String to, Integer[] areaCode) throws IllegalArgumentException {
+            List<String> columnNames, String from, String to, Integer[] areaCode) {
         CriteriaBuilder cb = this.entityManager.getCriteriaBuilder();
         CriteriaQuery<Tuple> cq = cb.createQuery(Tuple.class);
         List<Predicate> predicates = new ArrayList<>();
@@ -106,10 +105,13 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
 
         EntityType<WeatherDaily> model = weatherDaily.getModel();
 
-        for (Attribute<WeatherDaily, ?> singularAttribute : model.getDeclaredAttributes()) {
-            String attributeName = singularAttribute.getName();
-            if (!attributeName.equalsIgnoreCase("wDate"))
-                s.add(weatherDaily.get(attributeName));
+        List<String> valNames = ReflectionUtils.getValNames(WeatherDaily.class);
+
+        List<String> ignoreColumnNames = new ArrayList<>(
+                Arrays.asList("dailyId", "wDate", "areaCode", "insertDdtt", "updateDdtt"));
+        for (String valName : valNames) {
+            if (!ignoreColumnNames.contains(valName))
+                s.add(weatherDaily.get(model.getSingularAttribute(valName)));
         }
         cq.multiselect(s).where(predicates.toArray(new Predicate[]{}));
         return entityManager.createQuery(cq).getResultList();
