@@ -41,15 +41,17 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
         Predicate fromDatePredicate = cb.greaterThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), fromDate);
         Predicate toDatePredicate = cb.lessThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), toDate);
 
-        List<Predicate> areaRangePredicateList = new ArrayList<>();
-        for (Integer code : areaCode) {
-            Integer fromRange = Integer.valueOf(code + "00");
-            Integer toRange = Integer.valueOf(code + "99");
-            Predicate areaCodeFromPredicate = cb.greaterThanOrEqualTo(weatherDaily.get("areaCode"), fromRange);
-            Predicate areaCodeToPredicate = cb.lessThanOrEqualTo(weatherDaily.get("areaCode"), toRange);
-            areaRangePredicateList.add(cb.and(areaCodeFromPredicate, areaCodeToPredicate));
+        if (areaCode != null) {
+            List<Predicate> areaRangePredicateList = new ArrayList<>();
+            for (Integer code : areaCode) {
+                Integer fromRange = Integer.valueOf(code + "00");
+                Integer toRange = Integer.valueOf(code + "99");
+                Predicate areaCodeFromPredicate = cb.greaterThanOrEqualTo(weatherDaily.get("areaCode"), fromRange);
+                Predicate areaCodeToPredicate = cb.lessThanOrEqualTo(weatherDaily.get("areaCode"), toRange);
+                areaRangePredicateList.add(cb.and(areaCodeFromPredicate, areaCodeToPredicate));
+            }
+            predicates.add(cb.or(areaRangePredicateList.toArray(new Predicate[0])));
         }
-        predicates.add(cb.or(areaRangePredicateList.toArray(new Predicate[0])));
         predicates.add(fromDatePredicate);
         predicates.add(toDatePredicate);
 
@@ -60,8 +62,9 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
         s.add(weatherArea.get(WeatherArea_.subName));
         s.add(weatherArea.get(WeatherArea_.cityName));
 
-        for (String columnName : columnNames)
+        for (String columnName : columnNames) { // TODO: exception
             s.add(weatherDaily.get(CaseUtils.toCamelCase(columnName, false, '_')));
+        }
         cq.multiselect(s).where(predicates.toArray(new Predicate[]{}));
         return entityManager.createQuery(cq).getResultList();
     }
@@ -82,15 +85,17 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
         Predicate fromDatePredicate = cb.greaterThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), fromDate);
         Predicate toDatePredicate = cb.lessThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), toDate);
 
-        List<Predicate> areaRangePredicateList = new ArrayList<>();
-        for (Integer code : areaCode) {
-            Integer fromRange = Integer.valueOf(code + "00");
-            Integer toRange = Integer.valueOf(code + "99");
-            Predicate areaCodeFromPredicate = cb.greaterThanOrEqualTo(weatherDaily.get("areaCode"), fromRange);
-            Predicate areaCodeToPredicate = cb.lessThanOrEqualTo(weatherDaily.get("areaCode"), toRange);
-            areaRangePredicateList.add(cb.and(areaCodeFromPredicate, areaCodeToPredicate));
+        if (areaCode != null) {
+            List<Predicate> areaRangePredicateList = new ArrayList<>();
+            for (Integer code : areaCode) {
+                Integer fromRange = Integer.valueOf(code + "00");
+                Integer toRange = Integer.valueOf(code + "99");
+                Predicate areaCodeFromPredicate = cb.greaterThanOrEqualTo(weatherDaily.get("areaCode"), fromRange);
+                Predicate areaCodeToPredicate = cb.lessThanOrEqualTo(weatherDaily.get("areaCode"), toRange);
+                areaRangePredicateList.add(cb.and(areaCodeFromPredicate, areaCodeToPredicate));
+            }
+            predicates.add(cb.or(areaRangePredicateList.toArray(new Predicate[0])));
         }
-        predicates.add(cb.or(areaRangePredicateList.toArray(new Predicate[0])));
 
         predicates.add(fromDatePredicate);
         predicates.add(toDatePredicate);

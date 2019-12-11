@@ -37,7 +37,7 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({InvalidDataAccessApiUsageException.class})
-    public ResponseEntity<?> illegalArgumentExceptionHandler(InvalidDataAccessApiUsageException e) {
+    public ResponseEntity<?> invalidDataAccessApiUsageExceptionHandler(InvalidDataAccessApiUsageException e) {
         ApiError apiError = new ApiError(NOT_FOUND);
         String message = e.getMessage();
         apiError.setMessage(message);
@@ -68,6 +68,7 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
     }
 
     private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
+        ResponseEntity<String> stringResponseEntity = new ResponseEntity<>(new Gson().toJson(apiError), apiError.getStatus());
         return new ResponseEntity<>(new Gson().toJson(apiError), apiError.getStatus());
     }
 

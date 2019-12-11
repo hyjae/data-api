@@ -11,6 +11,9 @@ import java.util.List;
 @NoArgsConstructor
 public class NewsNamedEntitySummaryList {
 
+    @SerializedName("entity_name")
+    String entityName;
+
     @SerializedName("num_total_terms")
     Long numTotalTerms;
 
