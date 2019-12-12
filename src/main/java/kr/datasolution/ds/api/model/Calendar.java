@@ -1,4 +1,4 @@
-package kr.datasolution.ds.api.domain;
+package kr.datasolution.ds.api.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

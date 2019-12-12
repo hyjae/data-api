@@ -1,12 +1,10 @@
 package kr.datasolution.ds.api.controller;
 
 import io.swagger.annotations.Api;
-import kr.datasolution.ds.api.domain.NewsRelatedTopicList;
 import kr.datasolution.ds.api.validator.EntityName;
-import kr.datasolution.ds.api.validator.Interval;
-import kr.datasolution.ds.api.domain.NewsNamedEntityList;
+import kr.datasolution.ds.api.vo.NewsNamedEntityList;
 import kr.datasolution.ds.api.service.ElasticSearchService;
-import kr.datasolution.ds.api.domain.NewsNamedEntitySummaryList;
+import kr.datasolution.ds.api.vo.NewsNamedEntitySummaryList;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,20 +27,33 @@ public class NewsController {
     @Autowired
     ElasticSearchService elasticSearchService;
 
-    @RequestMapping(value = "/topic", method = RequestMethod.GET)
-    public List<Map<String, Integer>> getTopic(String query, String from, String to,
-                                               @RequestParam(defaultValue = "100") Integer size) {
-        return elasticSearchService.getTopics(query, from, to, size);
+//    @RequestMapping(value = "/topic/keyword/summary", method = RequestMethod.GET)
+//    public List<Map<String, String>> getTopicSummary(String query, String from, String to,
+//                                                     @RequestParam(defaultValue = "10") Integer size) {
+//        return elasticSearchService.getTopicSummary(query, from, to, size);
+//    }
+
+    @RequestMapping(value = "/topic/keyword", method = RequestMethod.GET)
+    public List<Map<String, String>> getTopic(String query, String from, String to,
+                                              @RequestParam(defaultValue = "100") Integer size,
+                                              @RequestParam(value = "sort", defaultValue = "desc") String sort) {
+        SortOrder sortOrder = SortOrder.valueOf(sort.toUpperCase());
+        return elasticSearchService.getTopic(query, from, to, size, sortOrder);
     }
 
     @RequestMapping(value = "/topic/related", method = RequestMethod.GET)
-    public NewsRelatedTopicList getRelatedTopic(String query, String from, String to,
-                                                @RequestParam(value = "interval", defaultValue = "1d") @Valid Interval interval,
-                                                int size, @RequestParam(value = "sort", defaultValue = "DESC") String sort) {
+    public List<Map<String, String>> getRelatedTopic(String query, String from, String to,
+                                                @RequestParam(defaultValue = "10") Integer size,
+                                                @RequestParam(value = "sort", defaultValue = "desc") String sort) {
         SortOrder sortOrder = SortOrder.valueOf(sort.toUpperCase());
-        DateHistogramInterval dateHistogramInterval = new DateHistogramInterval(interval.getInterval());
-        return elasticSearchService.getRelatedTopics(query, from, to, dateHistogramInterval, size, sortOrder);
+        return elasticSearchService.getRelatedTopic(query, from, to, size, sortOrder);
     }
+
+//    @RequestMapping(value = "/topic/related/summary", method = RequestMethod.GET)
+//    public List<Map<String, String>> getRelatedTopicSummary(String query, String from, String to,
+//                                                            @RequestParam(defaultValue = "10") Integer size) {
+//        return elasticSearchService.getRelatedTopicSummary(query, from, to, size);
+//    }
 
     @RequestMapping(value = "/timeline/summary", method = RequestMethod.GET, produces = "application/json")
     public Map<String, Long> getTimelineSummary(String query, String from, String to) {

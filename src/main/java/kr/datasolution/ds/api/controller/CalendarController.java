@@ -3,8 +3,8 @@ package kr.datasolution.ds.api.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
-import kr.datasolution.ds.api.domain.Calendar;
-import kr.datasolution.ds.api.domain.TimePoint;
+import kr.datasolution.ds.api.model.Calendar;
+import kr.datasolution.ds.api.vo.TimePoint;
 import kr.datasolution.ds.api.repository.CalendarCustomView;
 import kr.datasolution.ds.api.repository.CalendarRepository;
 import kr.datasolution.ds.api.util.HttpResponseCSVWriter;
@@ -28,8 +28,12 @@ import java.util.List;
 @Validated
 public class CalendarController {
 
+    private final CalendarRepository calendarRepository;
+
     @Autowired
-    CalendarRepository calendarRepository;
+    public CalendarController(CalendarRepository calendarRepository) {
+        this.calendarRepository = calendarRepository;
+    }
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     @Transactional(readOnly = true)
@@ -49,7 +53,7 @@ public class CalendarController {
         columnNames.remove(columnNames.size()-1);
         httpResponseCsvWriter.setHeaders(columnNames);
 
-        List<CalendarCustomView> bySolYmdBetween = calendarRepository.findBySolYmdBetween(from, to);
+        List<CalendarCustomView> bySolYmdBetween = calendarRepository.findBySolYmdBetweenOrderBySolYmd(from, to);
         bySolYmdBetween.forEach(
                 element -> httpResponseCsvWriter.write(element.getCalendarCSVFormat())
         );

@@ -1,6 +1,6 @@
 package kr.datasolution.ds.api.validator;
 
-import kr.datasolution.ds.api.domain.TimePoint;
+import kr.datasolution.ds.api.vo.TimePoint;
 import kr.datasolution.ds.api.util.CommonUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;

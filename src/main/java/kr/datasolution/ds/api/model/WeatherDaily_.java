@@ -1,4 +1,4 @@
-package kr.datasolution.ds.api.domain;
+package kr.datasolution.ds.api.model;
 
 import javax.annotation.Generated;
 import javax.persistence.metamodel.SingularAttribute;
@@ -7,7 +7,6 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.security.Timestamp;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 

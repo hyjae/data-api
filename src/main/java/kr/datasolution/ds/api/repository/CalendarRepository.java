@@ -1,6 +1,6 @@
 package kr.datasolution.ds.api.repository;
 
-import kr.datasolution.ds.api.domain.Calendar;
+import kr.datasolution.ds.api.model.Calendar;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
@@ -23,9 +23,9 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long>, Calen
             @QueryHint(name = READ_ONLY, value = "true")
     })
     @Query(value = "SELECT * FROM calendar WHERE sol_ymd between ?1 and ?2", nativeQuery = true)
-    Stream<Calendar> findBySolYmdBetweenStream(String fromDate, String toDate);
+    Stream<Calendar> findBySolYmdBetweenStream(String from, String to);
 
-    <T> List<T> findBySolYmdBetween(String fromDate, String toDate, Class<T> type);
+    <T> List<T> findBySolYmdBetweenOrderBySolYmd(String from, String to, Class<T> type);
 
-    List<CalendarCustomView> findBySolYmdBetween(String fromDate, String toDate);
+    List<CalendarCustomView> findBySolYmdBetweenOrderBySolYmd(String from, String to);
 }

@@ -1,6 +1,5 @@
-package kr.datasolution.ds.api.domain;
+package kr.datasolution.ds.api.model;
 
-import kr.datasolution.ds.api.util.DateFormatConverter;
 import lombok.*;
 
 import javax.persistence.*;

@@ -1,6 +1,6 @@
 package kr.datasolution.ds.api.validator;
 
-import kr.datasolution.ds.api.domain.TimePoint;
+import kr.datasolution.ds.api.vo.TimePoint;
 
 import java.lang.annotation.*;
 

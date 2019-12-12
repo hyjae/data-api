@@ -1,7 +1,7 @@
 package kr.datasolution.ds.api.repository;
 
 
-import kr.datasolution.ds.api.domain.WeatherDaily;
+import kr.datasolution.ds.api.model.WeatherDaily;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;

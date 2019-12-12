@@ -1,10 +1,10 @@
 package kr.datasolution.ds.api.repository;
 
 
-import kr.datasolution.ds.api.domain.WeatherArea;
-import kr.datasolution.ds.api.domain.WeatherArea_;
-import kr.datasolution.ds.api.domain.WeatherDaily;
-import kr.datasolution.ds.api.domain.WeatherDaily_;
+import kr.datasolution.ds.api.model.WeatherArea;
+import kr.datasolution.ds.api.model.WeatherArea_;
+import kr.datasolution.ds.api.model.WeatherDaily;
+import kr.datasolution.ds.api.model.WeatherDaily_;
 import kr.datasolution.ds.api.util.ReflectionUtils;
 import org.apache.commons.text.CaseUtils;
 import org.springframework.stereotype.Repository;
@@ -40,6 +40,8 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
 
         Predicate fromDatePredicate = cb.greaterThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), fromDate);
         Predicate toDatePredicate = cb.lessThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), toDate);
+        Order orderByAreaCode = cb.asc(weatherDaily.get("areaCode"));
+        Order orderByWDate = cb.asc(weatherDaily.get("wDate"));
 
         if (areaCode != null) {
             List<Predicate> areaRangePredicateList = new ArrayList<>();
@@ -66,6 +68,7 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
             s.add(weatherDaily.get(CaseUtils.toCamelCase(columnName, false, '_')));
         }
         cq.multiselect(s).where(predicates.toArray(new Predicate[]{}));
+        cq.orderBy(orderByAreaCode, orderByWDate);
         return entityManager.createQuery(cq).getResultList();
     }
 
@@ -84,6 +87,8 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
 
         Predicate fromDatePredicate = cb.greaterThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), fromDate);
         Predicate toDatePredicate = cb.lessThanOrEqualTo(weatherDaily.get("wDate").as(Date.class), toDate);
+        Order orderByAreaCode = cb.asc(weatherDaily.get("areaCode"));
+        Order orderByWDate = cb.asc(weatherDaily.get("wDate"));
 
         if (areaCode != null) {
             List<Predicate> areaRangePredicateList = new ArrayList<>();
@@ -119,6 +124,7 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
                 s.add(weatherDaily.get(model.getSingularAttribute(valName)));
         }
         cq.multiselect(s).where(predicates.toArray(new Predicate[]{}));
+        cq.orderBy(orderByAreaCode, orderByWDate);
         return entityManager.createQuery(cq).getResultList();
     }
 }

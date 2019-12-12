@@ -3,7 +3,11 @@ package kr.datasolution.ds.api.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
-import kr.datasolution.ds.api.domain.*;
+import kr.datasolution.ds.api.repository.CalendarCustomView;
+import kr.datasolution.ds.api.repository.DatasetCustomView;
+import kr.datasolution.ds.api.repository.DatasetRepository;
+import kr.datasolution.ds.api.vo.*;
+import kr.datasolution.ds.api.model.WeatherDaily;
 import kr.datasolution.ds.api.repository.WeatherDailyRepository;
 import kr.datasolution.ds.api.util.HttpResponseCSVWriter;
 import kr.datasolution.ds.api.util.ReflectionUtils;
@@ -17,10 +21,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Tuple;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static kr.datasolution.ds.api.util.CommonUtils.tupleToCSVFormat;
 
@@ -32,8 +33,22 @@ public class WeatherController {
     @PersistenceContext
     EntityManager entityManager;
 
+    final WeatherDailyRepository weatherDailyRepository;
+    final DatasetRepository datasetRepository;
+
     @Autowired
-    WeatherDailyRepository weatherDailyRepository;
+    public WeatherController(WeatherDailyRepository weatherDailyRepository, DatasetRepository datasetRepository) {
+        this.weatherDailyRepository = weatherDailyRepository;
+        this.datasetRepository = datasetRepository;
+    }
+
+    @RequestMapping(value = "/search")
+    public List<DatasetCustomView> searchWeatherDataset(String query) {
+        List<DatasetCustomView> datasetCustomViewList = datasetRepository.findByDsDesc(query);
+        Map<String, List<DatasetCustomView>> result = new LinkedHashMap<>();
+        result.put("c)
+
+    }
 
     @RequestMapping(value = "/{dataset}/download", method = RequestMethod.GET, produces = "application/json")
     @ApiImplicitParams({
