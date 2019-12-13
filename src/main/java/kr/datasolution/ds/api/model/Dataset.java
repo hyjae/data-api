@@ -1,19 +1,17 @@
 package kr.datasolution.ds.api.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "data_info")
+@Table(name = "dataset_info")
 public class Dataset {
 
     @Id
@@ -32,6 +30,9 @@ public class Dataset {
     @Column(name = "ds_desc")
     String dsDesc;
 
+    @Column(name = "ds_keyword")
+    String dsKeyword;
+
     @Column(name = "ds_ref")
     String dsRef;
 
@@ -40,6 +41,9 @@ public class Dataset {
 
     @Column(name = "ds_ver_minor")
     BigDecimal dsVerMinor;
+
+    @Column(name = "ds_format")
+    String dsFormat;
 
     @Column(name = "ds_source")
     String dsSource;
@@ -50,6 +54,7 @@ public class Dataset {
     @Column(name = "ds_start_ddtt")
     Timestamp dsStartDdtt;
 
+    @JsonFormat(pattern="yyyyMMdd")
     @Column(name = "ds_end_ddtt")
     Timestamp dsEndDdtt;
 

@@ -3,9 +3,6 @@ package kr.datasolution.ds.api.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
-import kr.datasolution.ds.api.repository.CalendarCustomView;
-import kr.datasolution.ds.api.repository.DatasetCustomView;
-import kr.datasolution.ds.api.repository.DatasetRepository;
 import kr.datasolution.ds.api.vo.*;
 import kr.datasolution.ds.api.model.WeatherDaily;
 import kr.datasolution.ds.api.repository.WeatherDailyRepository;
@@ -34,20 +31,10 @@ public class WeatherController {
     EntityManager entityManager;
 
     final WeatherDailyRepository weatherDailyRepository;
-    final DatasetRepository datasetRepository;
 
     @Autowired
-    public WeatherController(WeatherDailyRepository weatherDailyRepository, DatasetRepository datasetRepository) {
+    public WeatherController(WeatherDailyRepository weatherDailyRepository) {
         this.weatherDailyRepository = weatherDailyRepository;
-        this.datasetRepository = datasetRepository;
-    }
-
-    @RequestMapping(value = "/search")
-    public List<DatasetCustomView> searchWeatherDataset(String query) {
-        List<DatasetCustomView> datasetCustomViewList = datasetRepository.findByDsDesc(query);
-        Map<String, List<DatasetCustomView>> result = new LinkedHashMap<>();
-        result.put("c)
-
     }
 
     @RequestMapping(value = "/{dataset}/download", method = RequestMethod.GET, produces = "application/json")

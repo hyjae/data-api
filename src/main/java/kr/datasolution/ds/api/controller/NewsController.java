@@ -24,8 +24,12 @@ import java.util.*;
 @Validated
 public class NewsController {
 
+    final ElasticSearchService elasticSearchService;
+
     @Autowired
-    ElasticSearchService elasticSearchService;
+    public NewsController(ElasticSearchService elasticSearchService) {
+        this.elasticSearchService = elasticSearchService;
+    }
 
 //    @RequestMapping(value = "/topic/keyword/summary", method = RequestMethod.GET)
 //    public List<Map<String, String>> getTopicSummary(String query, String from, String to,
