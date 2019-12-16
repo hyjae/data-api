@@ -2,13 +2,10 @@ package kr.datasolution.ds.api.repository;
 
 import org.springframework.beans.factory.annotation.Value;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 
 public interface DatasetCustomView {
-
-    String getDsCategory(); // TODO: getting rid of it
 
     String getDsCode();
 
@@ -19,8 +16,6 @@ public interface DatasetCustomView {
     @Value("#{(target.dsKeyword).split('\\s+')}")
     List<String> getDsKeywords();
 
-    String getDsKeyword();
-
     String getDsVerMajor();
 
     String getDsFormat();
@@ -29,13 +24,16 @@ public interface DatasetCustomView {
 
     String getDsPeriod();
 
-    String getDsStartDdtt();
+    @Value("#{(@timestampConverter.convert(target.dsStartDdtt))}")
+    String getDsStartDate();
 
-    String getDsEndDdtt();
+    @Value("#{(@timestampConverter.convert(target.dsEndDdtt))}")
+    String getDsEndDate();
 
     Integer getDsSize();
 
-    String getUpdateDdtt();
+    @Value("#{(@timestampConverter.convert(target.updateDdtt))}")
+    String getUpdateDate();
 
     @Value("#{(target.dsCategory)}/" + "#{(target.dsCode)}" + "/download?format=csv&from=" + "#{@timestampConverter.convert(target.dsStartDdtt)}" + "&to=" + "#{@timestampConverter.convert(target.dsEndDdtt)}")
     String getDownloadLink();

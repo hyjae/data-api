@@ -24,7 +24,7 @@ public interface WeatherDailyRepository extends JpaRepository<WeatherDaily, Long
 //            @QueryHint(name = READ_ONLY, value = "true")
 //    })
 //    @Query(value = "SELECT * FROM weather_daily WHERE w_date between ?1 and ?2", nativeQuery = true)
-//    Stream<WeatherDaily> findByWDateBetween(String fromDate, String toDate);
+//    Stream<WeatherDaily> findByWDateBetween(String fromDate, String toDate); // TODO: stream?
     @Query(value = "SELECT * FROM weather_daily WHERE w_date between ?1 and ?2", nativeQuery = true)
     List<WeatherDaily> findByWDateBetween(String fromDate, String toDate);
 }

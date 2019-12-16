@@ -1,6 +1,7 @@
 package kr.datasolution.ds.api.controller;
 
 import io.swagger.annotations.Api;
+import kr.datasolution.ds.api.model.Dataset;
 import kr.datasolution.ds.api.model.WeatherDaily;
 import kr.datasolution.ds.api.repository.DatasetCustomView;
 import kr.datasolution.ds.api.repository.DatasetRepository;
@@ -36,7 +37,8 @@ public class DatasetController {
 
     @RequestMapping(value = "/search",  method = RequestMethod.GET)
     public List<DatasetCustomView> searchWeatherDataset(String query) {
-        return datasetRepository.findBySolYmdBetweenStream(query);
+        List<DatasetCustomView> byDsDescContainingOrDsKeyword = datasetRepository.findByDsDescContainingOrDsKeyword(query, query);
+        return byDsDescContainingOrDsKeyword;
     }
 
     @RequestMapping(value = "/download/latest", method = RequestMethod.GET)
