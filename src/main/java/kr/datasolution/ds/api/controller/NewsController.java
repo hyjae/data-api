@@ -60,16 +60,19 @@ public class NewsController {
 //    }
 
     @RequestMapping(value = "/timeline/summary", method = RequestMethod.GET, produces = "application/json")
-    public Map<String, Long> getTimelineSummary(String query, String from, String to) {
+    public List<Long> getTimelineSummary(String query, String from, String to) {
         final List<String> intervals = Arrays.asList("1d", "1w", "1m");
 
-        Map<String, Long> resultMap = new HashMap<>();
-        for (String interval : intervals) { // TODO: async or logic
-            DateHistogramInterval dateHistogramInterval = new DateHistogramInterval(interval);
-            Long docMeanFrequency = elasticSearchService.getDocMeanFrequency(query, from, to, dateHistogramInterval);
-            resultMap.put(interval, docMeanFrequency);
-        }
-        return resultMap;
+        List<Long> resultList = new ArrayList<>();
+//        for (String interval : intervals) { // TODO: async or logic
+//            DateHistogramInterval dateHistogramInterval = new DateHistogramInterval(interval);
+//            Long docMeanFrequency = elasticSearchService.getDocMeanFrequency(query, from, to, dateHistogramInterval);
+//            resultList.add(docMeanFrequency);
+//        }
+        resultList.add(10L);
+        resultList.add(100L);
+        resultList.add(1000L);
+        return resultList;
     }
 
     @RequestMapping(value = "/entity/summary", method = RequestMethod.GET)

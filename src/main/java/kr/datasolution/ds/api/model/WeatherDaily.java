@@ -17,7 +17,8 @@ import java.util.Date;
 @Table(name = "weather_daily")
 public class WeatherDaily implements Serializable {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "daily_id")
     private Integer dailyId;
 
@@ -115,7 +116,7 @@ public class WeatherDaily implements Serializable {
     @Column(name = "update_ddtt")
     private Timestamp updateDdtt;
 
-    public String toString() {
+    public String toCSV() {
         StringBuilder text = new StringBuilder();
         Field[] declaredFields = WeatherDaily.class.getDeclaredFields();
 
@@ -129,7 +130,7 @@ public class WeatherDaily implements Serializable {
                     String dateFormatString = formatter.format(o);
                     text.append(dateFormatString);
                 } else if (o instanceof WeatherArea) {
-                    text.append(((WeatherArea) o).toCSVFormat());
+                    text.append(((WeatherArea) o).toCSV());
                 } else {
                     text.append(o.toString());
                 }

@@ -21,6 +21,9 @@ public class Dataset {
     @Column(name = "ds_table_name")
     String dsTableName;
 
+    @Column(name = "ds_category")
+    String dsCategory;
+
     @Column(name = "ds_code")
     String dsCode;
 
@@ -54,7 +57,6 @@ public class Dataset {
     @Column(name = "ds_start_ddtt")
     Timestamp dsStartDdtt;
 
-    @JsonFormat(pattern="yyyyMMdd")
     @Column(name = "ds_end_ddtt")
     Timestamp dsEndDdtt;
 
