@@ -4,10 +4,21 @@ import io.swagger.annotations.Api;
 import kr.datastation.api.repository.datastation.DatasetCustomView;
 import kr.datastation.api.repository.datastation.DatasetRepository;
 import kr.datastation.api.repository.dataset.WeatherDailyRepository;
+import kr.datastation.api.util.HttpResponseCSVWriter;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.Tuple;
+import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
+import java.security.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static kr.datastation.api.util.CommonUtils.tupleToCSVFormat;
 
 
 @RestController
@@ -25,9 +36,18 @@ public class DatasetController {
     }
 
     @RequestMapping(value = "/search", method = RequestMethod.GET)
-    public List<DatasetCustomView> searchWeatherDataset(String query) {
+    public void searchWeatherDataset(HttpServletResponse response, String query) {
         List<DatasetCustomView> byDsDescContainingOrDsKeyword = datasetRepository.findByDsDescContainingOrDsKeyword(query, query);
-        return byDsDescContainingOrDsKeyword;
+        List<String> collect = byDsDescContainingOrDsKeyword.stream().map(i -> i.getDsCode()).collect(Collectors.toList());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+        DateTime now = DateTime.now();
+        String format = simpleDateFormat.format(now.toDate());
+        String format1 = simpleDateFormat.format(now.minusYears(1).toDate());
+        List<Tuple> t = weatherDailyRepository.findByColumnNameAndByWDateBetweenAndByAreaCode(collect, format, format1, null);
+        HttpResponseCSVWriter httpResponseCSVWriter = new HttpResponseCSVWriter("dataset.csv", response);
+        t.forEach(
+                element -> httpResponseCSVWriter.write(tupleToCSVFormat(element))
+        );
     }
 
 //    @RequestMapping(value = "/download/latest", method = RequestMethod.GET, produces = "application/json")
