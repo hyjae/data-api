@@ -36,8 +36,12 @@ public class ElasticSearchService {
 
     private static final String NEWS_IDX = "news-*";
 
+    final ElasticsearchTemplate elasticsearchTemplate;
+
     @Autowired
-    ElasticsearchTemplate elasticsearchTemplate;
+    public ElasticSearchService(ElasticsearchTemplate elasticsearchTemplate) {
+        this.elasticsearchTemplate = elasticsearchTemplate;
+    }
 
     public List<Map<String, String>> getTopicSummary(String query, String from, String to, Integer size) {
         TermsBuilder termsBuilder = AggregationBuilders.terms("agg").field("topics").size(size);
@@ -69,6 +73,15 @@ public class ElasticSearchService {
         return result;
     }
 
+    /**
+     * Steps:
+     *  1. Aggregated by a list of topics; essentially this is the same as "GROUP BY topic"
+     *      - This return a list of topics + the number occurrence in documents
+     *      - ex) "word", 15 => "word" shows up on 15 documents
+     *  2. Sub-aggregated by a date and order by the number of occurrence
+     *      - Each record now has a date on which a topic occurs at most.
+     *      - ex) "word", 15, "20190101"
+     */
     public List<Map<String, String>> getTopic(String query, String from, String to, Integer size, SortOrder sort) {
         DateHistogramInterval dateHistogramInterval = new DateHistogramInterval("1d");
         TermsBuilder termsBuilder = AggregationBuilders
@@ -107,6 +120,7 @@ public class ElasticSearchService {
             Histogram histogram = bucket.getAggregations().get("date_hist");
             entity.put("date", histogram.getBuckets().get(0).getKeyAsString());
             entity.put("name", bucket.getKeyAsString());
+            entity.put("count", String.valueOf(bucket.getDocCount()));
             result.add(entity);
         }
 
@@ -187,6 +201,7 @@ public class ElasticSearchService {
             Histogram histogram = bucket.getAggregations().get("date_hist");
             entity.put("date", histogram.getBuckets().get(0).getKeyAsString());
             entity.put("name", bucket.getKeyAsString());
+            entity.put("count", String.valueOf(bucket.getDocCount()));
             result.add(entity);
         }
 
@@ -227,10 +242,54 @@ public class ElasticSearchService {
         return Double.valueOf(avg).longValue();
     }
 
-    public NewsNamedEntitySummaryList getNamedEntitySummary(String query, String entityName, String from, String to, int size) {
+    public List<NewsNamedEntityCSVObject> getNamedEntityCSVObject(String query, List<String> namedEntityList,
+                                                                  String from, String to, Integer size) {
+        final int LIMIT_SIZE = 1000;
+
+        if (size == null)
+            size = LIMIT_SIZE;
+
+        List<NewsNamedEntityCSVObject> resultList = new ArrayList<>();
+        for (String entityName : namedEntityList)
+            resultList.addAll(getNamedEntity(query, entityName, from, to, size));
+        return resultList;
+    }
+
+    private List<NewsNamedEntityCSVObject> getNamedEntity(String query, String entityName, String from, String to, Integer size) {
+        TermsBuilder termsBuilder = AggregationBuilders.terms(entityName).field(entityName).size(size); // default size 10
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+                .query(QueryBuilders.rangeQuery("written_time")
+                        .from(from)
+                        .to(to)
+                        .format("yyyyMMdd")
+                        .includeLower(true)
+                        .includeUpper(true))
+                .query(QueryBuilders.queryStringQuery(query)
+                        .defaultOperator(QueryStringQueryBuilder.Operator.AND)
+                        .defaultField("content"))
+                .size(0)
+                .sort(new FieldSortBuilder("written_time").order(SortOrder.DESC))
+                .aggregation(termsBuilder);
+
+        SearchRequest searchRequest = new SearchRequest(NEWS_IDX).source(searchSourceBuilder);
+        SearchResponse searchResponse = elasticsearchTemplate.getClient().search(searchRequest).actionGet();
+
+        NewsNamedEntitySummaryList newsNamedEntitySummaryList = new NewsNamedEntitySummaryList();
+        newsNamedEntitySummaryList.setEntityName(entityName);
+        Aggregations aggregations = searchResponse.getAggregations();
+        Terms terms = aggregations.get(entityName);
+
+        List<NewsNamedEntityCSVObject> newsNamedEntityCSVObjectList = new ArrayList<>();
+        for (Terms.Bucket bucket : terms.getBuckets())
+            newsNamedEntityCSVObjectList.add(new NewsNamedEntityCSVObject(bucket.getKeyAsString(), entityName, bucket.getDocCount()));
+        return newsNamedEntityCSVObjectList;
+    }
+
+    public NewsNamedEntitySummaryList getNamedEntitySummary(String query, String entityName, String from, String to, Integer size) {
 
         CardinalityBuilder cardinalityBuilder = AggregationBuilders.cardinality("num_total_terms").field(entityName);
-        TermsBuilder termsBuilder = AggregationBuilders.terms(entityName).field(entityName).size(size);
+        TermsBuilder termsBuilder = AggregationBuilders.terms(entityName).field(entityName).size(size); // default size 10
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
                 .query(QueryBuilders.rangeQuery("written_time")

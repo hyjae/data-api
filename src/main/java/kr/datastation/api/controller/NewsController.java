@@ -1,7 +1,9 @@
 package kr.datastation.api.controller;
 
 import io.swagger.annotations.Api;
+import kr.datastation.api.util.HttpResponseCSVWriter;
 import kr.datastation.api.validator.EntityName;
+import kr.datastation.api.vo.NewsNamedEntityCSVObject;
 import kr.datastation.api.vo.NewsNamedEntityList;
 import kr.datastation.api.service.ElasticSearchService;
 import kr.datastation.api.vo.NewsNamedEntitySummaryList;
@@ -13,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.*;
 
 
@@ -24,19 +28,15 @@ import java.util.*;
 public class NewsController {
 
     final ElasticSearchService elasticSearchService;
+    final List<String> entityNames = Arrays.asList(
+            "locationNamedEntity", "organizationNamedEntity", "personNamedEntity", "etcNamedEntity");
 
     @Autowired
     public NewsController(ElasticSearchService elasticSearchService) {
         this.elasticSearchService = elasticSearchService;
     }
 
-//    @RequestMapping(value = "/topic/keyword/summary", method = RequestMethod.GET)
-//    public List<Map<String, String>> getTopicSummary(String query, String from, String to,
-//                                                     @RequestParam(defaultValue = "10") Integer size) {
-//        return elasticSearchService.getTopicSummary(query, from, to, size);
-//    }
-
-    @RequestMapping(value = "/topic/keyword", method = RequestMethod.GET)
+    @RequestMapping(value = "/topic", method = RequestMethod.GET)
     public List<Map<String, String>> getTopic(String query, String from, String to,
                                               @RequestParam(defaultValue = "100") Integer size,
                                               @RequestParam(value = "sort", defaultValue = "desc") String sort) {
@@ -44,7 +44,7 @@ public class NewsController {
         return elasticSearchService.getTopic(query, from, to, size, sortOrder);
     }
 
-    @RequestMapping(value = "/topic/related", method = RequestMethod.GET)
+    @RequestMapping(value = "/related", method = RequestMethod.GET)
     public List<Map<String, String>> getRelatedTopic(String query, String from, String to,
                                                 @RequestParam(defaultValue = "10") Integer size,
                                                 @RequestParam(value = "sort", defaultValue = "desc") String sort) {
@@ -52,11 +52,35 @@ public class NewsController {
         return elasticSearchService.getRelatedTopic(query, from, to, size, sortOrder);
     }
 
-//    @RequestMapping(value = "/topic/related/summary", method = RequestMethod.GET)
-//    public List<Map<String, String>> getRelatedTopicSummary(String query, String from, String to,
-//                                                            @RequestParam(defaultValue = "10") Integer size) {
-//        return elasticSearchService.getRelatedTopicSummary(query, from, to, size);
-//    }
+    @RequestMapping(value = "/related/download", method = RequestMethod.GET)
+    public void getRelatedTopicDownload(HttpServletResponse httpServletResponse,
+                                        String query, String from, String to,
+                                        @RequestParam(defaultValue = "100") Integer size,
+                                        @RequestParam(value = "sort", defaultValue = "desc") String sort) throws IOException {
+        SortOrder sortOrder = SortOrder.valueOf(sort.toUpperCase());
+        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("related.csv", httpServletResponse);
+        List<Map<String, String>> relatedTopic = elasticSearchService.getRelatedTopic(query, from, to, size, sortOrder);
+
+        final List<String> headers = Arrays.asList("relword", "doccnt");
+        httpResponseCsvWriter.setHeaders(headers);
+        for (Map<String, String> entry : relatedTopic)
+            httpResponseCsvWriter.write(entry.get("name") + ", " + entry.get("count"));
+    }
+
+    @RequestMapping(value = "/topic/download", method = RequestMethod.GET)
+    public void getTopicDownload(HttpServletResponse httpServletResponse,
+                                 String query, String from, String to,
+                                        @RequestParam(defaultValue = "100") Integer size,
+                                        @RequestParam(value = "sort", defaultValue = "desc") String sort) throws IOException {
+        SortOrder sortOrder = SortOrder.valueOf(sort.toUpperCase());
+        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("related.csv", httpServletResponse);
+        List<Map<String, String>> topic = elasticSearchService.getTopic(query, from, to, size, sortOrder);
+
+        final List<String> headers = Arrays.asList("subject", "doccnt");
+        httpResponseCsvWriter.setHeaders(headers);
+        for (Map<String, String> entry : topic)
+            httpResponseCsvWriter.write(entry.get("name") + ", " + entry.get("count"));
+    }
 
     @RequestMapping(value = "/timeline/summary", method = RequestMethod.GET, produces = "application/json")
     public List<Long> getTimelineSummary(String query, String from, String to) {
@@ -75,13 +99,25 @@ public class NewsController {
     }
 
     @RequestMapping(value = "/entity/summary", method = RequestMethod.GET)
-    public List<NewsNamedEntitySummaryList> getEntitySummary(String query, String from, String to, int size) {
-        final List<String> entityNames = Arrays.asList("locationNamedEntity", "organizationNamedEntity", "personNamedEntity", "etcNamedEntity");
-
+    public List<NewsNamedEntitySummaryList> getEntitySummary(String query, String from, String to,
+                                                             @RequestParam(value = "size", defaultValue = "100") Integer size) {
         List<NewsNamedEntitySummaryList> resultList = new ArrayList<>();
         for (String entityName : entityNames) // TODO: async
             resultList.add(elasticSearchService.getNamedEntitySummary(query, entityName, from, to, size));
         return resultList;
+    }
+
+    @RequestMapping(value = "/entity/download", method = RequestMethod.GET)
+    public void getEntityDownload(HttpServletResponse response, String query, String from, String to,
+                                  @RequestParam(value = "size", defaultValue = "1000") Integer size,
+                                  @RequestParam(defaultValue = "csv") String format) throws IOException {
+        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("entity.csv", response);
+        final List<String> headers = Arrays.asList("entity", "entitykind", "doccnt");
+        httpResponseCsvWriter.setHeaders(headers); // TODO: @
+
+        List<NewsNamedEntityCSVObject> namedEntityList = elasticSearchService.getNamedEntityCSVObject(query, entityNames, from, to, size);
+        namedEntityList.forEach(element -> httpResponseCsvWriter.write(element.toCSV()));
+        httpResponseCsvWriter.close();
     }
 
     // from: (page-1)*size, size: size

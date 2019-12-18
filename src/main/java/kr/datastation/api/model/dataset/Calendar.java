@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name = "calendar")
+@Table(name = "calendar", schema = "dataset_a")
 public class Calendar {
 
     @Id

@@ -1,6 +1,7 @@
 package kr.datastation.api.controller;
 
 import io.swagger.annotations.Api;
+import kr.datastation.api.model.datastation.Dataset;
 import kr.datastation.api.repository.datastation.DatasetCustomView;
 import kr.datastation.api.repository.datastation.DatasetRepository;
 import kr.datastation.api.repository.dataset.WeatherDailyRepository;
@@ -37,7 +38,7 @@ public class DatasetController {
 
     @RequestMapping(value = "/search", method = RequestMethod.GET)
     public void searchWeatherDataset(HttpServletResponse response, String query) {
-        List<DatasetCustomView> byDsDescContainingOrDsKeyword = datasetRepository.findByDsDescContainingOrDsKeyword(query, query);
+        List<DatasetCustomView> byDsDescContainingOrDsKeyword = datasetRepository.findByDsDescContainingOrDsKeywordContaining(query, query);
         List<String> collect = byDsDescContainingOrDsKeyword.stream().map(i -> i.getDsCode()).collect(Collectors.toList());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
         DateTime now = DateTime.now();

@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "weather_area_info")
+@Table(name = "weather_area_info", schema = "dataset_a")
 public class WeatherArea implements Serializable {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

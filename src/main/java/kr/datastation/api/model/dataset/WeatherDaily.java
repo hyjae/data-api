@@ -14,7 +14,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "weather_daily")
+@Table(name = "weather_daily", schema = "dataset_a")
 public class WeatherDaily implements Serializable {
 
     @Id
