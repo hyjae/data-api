@@ -28,8 +28,8 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfo(
-                "Data API",
-                "Data API",
+                "DataStation API",
+                "DataStation API",
                 "v0.01",
                 "Terms of service",
                 new Contact("N.A", "N.A", "N.A"),

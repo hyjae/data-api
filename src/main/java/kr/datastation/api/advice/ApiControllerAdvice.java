@@ -11,9 +11,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.validation.ConstraintViolation;
@@ -26,6 +28,22 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @ControllerAdvice(assignableTypes = {NewsController.class, WeatherController.class, DateHandlerResolver.class, WeatherDailyRepositoryImpl.class})
 public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
+
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        ApiError apiError = new ApiError(NOT_FOUND);
+        String message = ex.getMessage();
+        apiError.setMessage(message);
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<?> methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        ApiError apiError = new ApiError(NOT_FOUND);
+        String message = e.getMessage();
+        apiError.setMessage(message);
+        return buildResponseEntity(apiError);
+    }
 
     @ExceptionHandler({IllegalStateException.class})
     public ResponseEntity<?> illegalStateExceptionHandler(IllegalStateException e) {

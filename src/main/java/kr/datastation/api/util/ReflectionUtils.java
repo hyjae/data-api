@@ -10,14 +10,16 @@ import java.util.List;
 
 public class ReflectionUtils {
 
-    public static List<String> getColumnNames(Class clazz)
-    {
+    public static List<String> getColumnNames(Class clazz) {
         List<String> Columns = new ArrayList<>();
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             Column col = field.getAnnotation(Column.class);
-            if (col != null)
+            if (col != null) {
                 Columns.add(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, col.name()));
+            } else {
+                Columns.add(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName()));
+            }
         }
         return Columns;
     }

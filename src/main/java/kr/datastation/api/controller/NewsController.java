@@ -1,12 +1,16 @@
 package kr.datastation.api.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import kr.datastation.api.util.HttpResponseCSVWriter;
+import kr.datastation.api.validator.DateRequestParam;
 import kr.datastation.api.validator.EntityName;
 import kr.datastation.api.vo.NewsNamedEntityCSVObject;
 import kr.datastation.api.vo.NewsNamedEntityList;
 import kr.datastation.api.service.ElasticSearchService;
 import kr.datastation.api.vo.NewsNamedEntitySummaryList;
+import kr.datastation.api.vo.TimePoint;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -29,36 +33,103 @@ public class NewsController {
 
     final ElasticSearchService elasticSearchService;
     final List<String> entityNames = Arrays.asList(
-            "locationNamedEntity", "organizationNamedEntity", "personNamedEntity", "etcNamedEntity");
+            "locationNamedEntity", "organizationNamedEntity", "personNamedEntity", "etcNamedEntity", "totalNamedEntity");
 
     @Autowired
     public NewsController(ElasticSearchService elasticSearchService) {
         this.elasticSearchService = elasticSearchService;
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
+    })
+    @RequestMapping(value = "/entity/name", method = RequestMethod.GET)
+    public NewsNamedEntityList getEntityByName(@RequestParam(value = "entity") @Valid EntityName entityName,
+                                               @DateRequestParam(point = TimePoint.FROM) String from,
+                                               @DateRequestParam(point = TimePoint.FROM) String to,
+                                               @RequestParam(required = true) int page,
+                                               @RequestParam(required = true) int size) {
+        // from: (page-1)*size, size: size
+        return elasticSearchService.getEntityByName(entityName.getEntityName(), from, to, page, size);
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
+    })
+    @RequestMapping(value = "/entity/summary", method = RequestMethod.GET)
+    public List<NewsNamedEntitySummaryList> getEntitySummary(String query,
+                                                             @DateRequestParam(point = TimePoint.FROM) String from,
+                                                             @DateRequestParam(point = TimePoint.TO) String to,
+                                                             @RequestParam(value = "size", defaultValue = "100") int size) {
+        List<NewsNamedEntitySummaryList> resultList = new ArrayList<>();
+        for (String entityName : entityNames) // TODO: async
+            resultList.add(elasticSearchService.getNamedEntitySummary(query, entityName, from, to, size));
+        return resultList;
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
+    })
+    @RequestMapping(value = "/entity/download", method = RequestMethod.GET)
+    public void downloadFullEntity(HttpServletResponse response,
+                                   @RequestParam(required = true) String query,
+                                   @DateRequestParam(point = TimePoint.FROM) String from,
+                                   @DateRequestParam(point = TimePoint.TO) String to,
+                                   @RequestParam(value = "size", defaultValue = "1000") int size,
+                                   @RequestParam(defaultValue = "csv") String format) throws IOException {
+        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("entity.csv", response);
+
+        final List<String> headers = Arrays.asList("entity", "entitykind", "doccnt");
+        httpResponseCsvWriter.setHeaders(headers);
+
+        List<NewsNamedEntityCSVObject> namedEntityList = elasticSearchService.getNamedEntityCSVObject(query, entityNames, from, to, size);
+        namedEntityList.forEach(element -> httpResponseCsvWriter.write(element.toCSV()));
+        httpResponseCsvWriter.close();
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
+    })
     @RequestMapping(value = "/topic", method = RequestMethod.GET)
-    public List<Map<String, String>> getTopic(String query, String from, String to,
-                                              @RequestParam(defaultValue = "100") Integer size,
+    public List<Map<String, String>> getTopic(String query,
+                                              @DateRequestParam(point = TimePoint.FROM) String from,
+                                              @DateRequestParam(point = TimePoint.TO) String to,
+                                              @RequestParam(defaultValue = "100") int size,
                                               @RequestParam(value = "sort", defaultValue = "desc") String sort) {
         SortOrder sortOrder = SortOrder.valueOf(sort.toUpperCase());
         return elasticSearchService.getTopic(query, from, to, size, sortOrder);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
+    })
     @RequestMapping(value = "/related", method = RequestMethod.GET)
-    public List<Map<String, String>> getRelatedTopic(String query, String from, String to,
-                                                @RequestParam(defaultValue = "10") Integer size,
-                                                @RequestParam(value = "sort", defaultValue = "desc") String sort) {
+    public List<Map<String, String>> getRelatedTopic(String query,
+                                                     @DateRequestParam(point = TimePoint.FROM) String from,
+                                                     @DateRequestParam(point = TimePoint.TO) String to,
+                                                     @RequestParam(defaultValue = "10") int size,
+                                                     @RequestParam(value = "sort", defaultValue = "desc") String sort) {
         SortOrder sortOrder = SortOrder.valueOf(sort.toUpperCase());
         return elasticSearchService.getRelatedTopic(query, from, to, size, sortOrder);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
+    })
     @RequestMapping(value = "/related/download", method = RequestMethod.GET)
-    public void getRelatedTopicDownload(HttpServletResponse httpServletResponse,
-                                        String query, String from, String to,
-                                        @RequestParam(defaultValue = "100") Integer size,
-                                        @RequestParam(value = "sort", defaultValue = "desc") String sort) throws IOException {
+    public void downloadFullRelatedTopic(HttpServletResponse response, String query,
+                                         @DateRequestParam(point = TimePoint.FROM) String from,
+                                         @DateRequestParam(point = TimePoint.TO) String to,
+                                         @RequestParam(defaultValue = "100") int size,
+                                         @RequestParam(value = "sort", defaultValue = "desc") String sort) throws IOException {
         SortOrder sortOrder = SortOrder.valueOf(sort.toUpperCase());
-        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("related.csv", httpServletResponse);
+        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("related.csv", response);
         List<Map<String, String>> relatedTopic = elasticSearchService.getRelatedTopic(query, from, to, size, sortOrder);
 
         final List<String> headers = Arrays.asList("relword", "doccnt");
@@ -67,13 +138,18 @@ public class NewsController {
             httpResponseCsvWriter.write(entry.get("name") + ", " + entry.get("count"));
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
+    })
     @RequestMapping(value = "/topic/download", method = RequestMethod.GET)
-    public void getTopicDownload(HttpServletResponse httpServletResponse,
-                                 String query, String from, String to,
-                                        @RequestParam(defaultValue = "100") Integer size,
-                                        @RequestParam(value = "sort", defaultValue = "desc") String sort) throws IOException {
+    public void downloadTopic(HttpServletResponse response, String query,
+                              @DateRequestParam(point = TimePoint.FROM) String from,
+                              @DateRequestParam(point = TimePoint.TO) String to,
+                              @RequestParam(defaultValue = "100") int size,
+                              @RequestParam(value = "sort", defaultValue = "desc") String sort) throws IOException {
         SortOrder sortOrder = SortOrder.valueOf(sort.toUpperCase());
-        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("related.csv", httpServletResponse);
+        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("topic.csv", response);
         List<Map<String, String>> topic = elasticSearchService.getTopic(query, from, to, size, sortOrder);
 
         final List<String> headers = Arrays.asList("subject", "doccnt");
@@ -97,35 +173,7 @@ public class NewsController {
         resultList.add(1000L);
         return resultList;
     }
-
-    @RequestMapping(value = "/entity/summary", method = RequestMethod.GET)
-    public List<NewsNamedEntitySummaryList> getEntitySummary(String query, String from, String to,
-                                                             @RequestParam(value = "size", defaultValue = "100") Integer size) {
-        List<NewsNamedEntitySummaryList> resultList = new ArrayList<>();
-        for (String entityName : entityNames) // TODO: async
-            resultList.add(elasticSearchService.getNamedEntitySummary(query, entityName, from, to, size));
-        return resultList;
-    }
-
-    @RequestMapping(value = "/entity/download", method = RequestMethod.GET)
-    public void getEntityDownload(HttpServletResponse response, String query, String from, String to,
-                                  @RequestParam(value = "size", defaultValue = "1000") Integer size,
-                                  @RequestParam(defaultValue = "csv") String format) throws IOException {
-        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("entity.csv", response);
-        final List<String> headers = Arrays.asList("entity", "entitykind", "doccnt");
-        httpResponseCsvWriter.setHeaders(headers); // TODO: @
-
-        List<NewsNamedEntityCSVObject> namedEntityList = elasticSearchService.getNamedEntityCSVObject(query, entityNames, from, to, size);
-        namedEntityList.forEach(element -> httpResponseCsvWriter.write(element.toCSV()));
-        httpResponseCsvWriter.close();
-    }
-
-    // from: (page-1)*size, size: size
-    @RequestMapping(value = "/entity/name", method = RequestMethod.GET)
-    public NewsNamedEntityList getEntityByName(@RequestParam(value = "entity") @Valid EntityName entityName,
-                                               String from, String to, int page, int size) {
-        return elasticSearchService.getEntityByName(entityName.getEntityName(), from, to, page, size);
-    }
 }
 
 // TODO: controlleradvice without requestparam
+// TODO: swagger doc

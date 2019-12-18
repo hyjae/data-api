@@ -11,11 +11,8 @@ import kr.datastation.api.validator.DateRequestParam;
 import kr.datastation.api.util.CommonUtils;
 import kr.datastation.api.vo.TimePoint;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Tuple;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -25,9 +22,6 @@ import java.util.*;
 @RequestMapping("/weather")
 @Api("/weather")
 public class WeatherController {
-
-    @PersistenceContext
-    EntityManager entityManager;
 
     final WeatherDailyRepository weatherDailyRepository;
 
@@ -41,36 +35,36 @@ public class WeatherController {
             @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
-    public void getDataDownload(HttpServletResponse response, @PathVariable String dataset,
-                                @RequestParam(required = false, defaultValue = "csv") String format,
-                                @DateRequestParam(point = TimePoint.FROM) String from, @DateRequestParam(point = TimePoint.TO) String to, // TODO: areacode validity check
-                                @RequestParam(value = "areacode", required = false) Integer[] areaCode) throws IOException, IllegalArgumentException {
+    public void downloadWeatherDataset(HttpServletResponse response,
+                                       @PathVariable String dataset,
+                                       @RequestParam(required = false, defaultValue = "csv") String format,
+                                       @DateRequestParam(point = TimePoint.FROM) String from,
+                                       @DateRequestParam(point = TimePoint.TO) String to,
+                                       @RequestParam(value = "areacode", required = false) Integer[] areaCode) throws IOException, IllegalArgumentException {
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("weather.csv", response);
 
         String datasetName = dataset.replace("-", "_");
         List<String> columnNames = Arrays.asList("w_date", "area_code", "main_name", "sub_name", "city_name", datasetName);
         httpResponseCsvWriter.setHeaders(columnNames);
 
-        ArrayList<String> datasets = new ArrayList<>(Collections.singletonList(datasetName));
-        List<Tuple> resultList = weatherDailyRepository.findByColumnNameAndByWDateBetweenAndByAreaCode(datasets, from, to, areaCode);
-        resultList.forEach(
-                element -> httpResponseCsvWriter.write(CommonUtils.tupleToCSVFormat(element))
-        );
+        ArrayList<String> datasetNameList = new ArrayList<>(Collections.singletonList(datasetName));
+        List<Tuple> resultList = weatherDailyRepository.findByColumnNameAndByWDateBetweenAndByAreaCode(datasetNameList, from, to, areaCode);
+        resultList.forEach(element -> httpResponseCsvWriter.write(CommonUtils.tupleToCSVFormat(element)));
         httpResponseCsvWriter.close();
     }
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
-    @Transactional(readOnly = true) // TODO: ?
     @ApiImplicitParams({
             @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
-    public void downloadFullCSV(HttpServletResponse response, @RequestParam(required = false, defaultValue = "csv") String format,
-                                @DateRequestParam(point = TimePoint.FROM) String from, @DateRequestParam(point = TimePoint.TO) String to,
-                                @RequestParam(value = "areacode", required = false) Integer[] areaCode) throws IOException {
+    public void downloadFullWeatherDataset(HttpServletResponse response,
+                                           @RequestParam(required = false, defaultValue = "csv") String format,
+                                           @DateRequestParam(point = TimePoint.FROM) String from,
+                                           @DateRequestParam(point = TimePoint.TO) String to,
+                                           @RequestParam(value = "areacode", required = false) Integer[] areaCode) throws IOException {
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("weather.csv", response);
 
-        // TODO: bug @Column
         List<String> columnNames = ReflectionUtils.getColumnNames(WeatherDaily.class);
         columnNames.remove(0); // delete idx
         columnNames.add(1, "area_code");
@@ -81,15 +75,7 @@ public class WeatherController {
         columnNames.remove(columnNames.size()-1);
         httpResponseCsvWriter.setHeaders(columnNames);
 
-        // TODO: area_code validity check
         List<Tuple> weatherDailyStream = weatherDailyRepository.findByWDateBetweenAndByAreaCode(from, to, areaCode);
-        weatherDailyStream.forEach(
-                element -> httpResponseCsvWriter.write(CommonUtils.tupleToCSVFormat(element))
-        );
-    }
-
-    @RequestMapping(value = "/meta", method = RequestMethod.GET)
-    public void getMetaData(@RequestParam("dataType") String dataType) {
-        // TODO:
+        weatherDailyStream.forEach(element -> httpResponseCsvWriter.write(CommonUtils.tupleToCSVFormat(element)));
     }
 }
