@@ -3,6 +3,7 @@ package kr.datastation.api.repository.datastation;
 
 import kr.datastation.api.model.datastation.Dataset;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

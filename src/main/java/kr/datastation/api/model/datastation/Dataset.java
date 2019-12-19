@@ -1,27 +1,29 @@
 package kr.datastation.api.model.datastation;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Data
-@NoArgsConstructor
 @Entity
+@RequiredArgsConstructor
 @Table(name = "dataset_info", schema = "datastation_a")
 public class Dataset {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ds_id")
     Integer dsId;
 
+    @ManyToOne
+    @JoinColumn(name = "ctrg_id") // column name in DB
+    Category category;
+
     @Column(name = "ds_table_name")
     String dsTableName;
-
-    @Column(name = "ds_category")
-    String dsCategory;
 
     @Column(name = "ds_code")
     String dsCode;
@@ -68,7 +70,7 @@ public class Dataset {
     @Column(name = "domain_id")
     Integer domainId;
 
-    @Column(name = "inter_ddtt")
+    @Column(name = "insert_ddtt")
     Timestamp insertDdtt;
 
     @Column(name = "update_ddtt")

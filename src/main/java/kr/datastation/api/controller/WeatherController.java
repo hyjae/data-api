@@ -17,6 +17,7 @@ import javax.persistence.Tuple;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/weather")
@@ -28,6 +29,28 @@ public class WeatherController {
     @Autowired
     public WeatherController(WeatherDailyRepository weatherDailyRepository) {
         this.weatherDailyRepository = weatherDailyRepository;
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
+    })
+    @RequestMapping(value = "/download/multiple", method = RequestMethod.GET, produces = "application/json")
+    public void downloadMultipleWeatherDataset(HttpServletResponse response,
+                                       @RequestParam List<String> dataset,
+                                       @RequestParam(required = false, defaultValue = "csv") String format,
+                                       @DateRequestParam(point = TimePoint.FROM) String from,
+                                       @DateRequestParam(point = TimePoint.TO) String to) throws IOException, IllegalArgumentException {
+        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("weather.csv", response);
+
+        List<String> datasetList = dataset.stream().map(i -> i.replace("-", "_")).collect(Collectors.toList());
+        List<String> columnNames = Arrays.asList("w_date", "area_code", "main_name", "sub_name", "city_name");
+        columnNames.addAll(datasetList);
+        httpResponseCsvWriter.setHeaders(columnNames);
+
+        List<Tuple> resultList = weatherDailyRepository.findByColumnNameAndByWDateBetweenAndByAreaCode(columnNames, from, to, null);
+        resultList.forEach(element -> httpResponseCsvWriter.write(CommonUtils.tupleToCSVFormat(element)));
+        httpResponseCsvWriter.close();
     }
 
     @RequestMapping(value = "/{dataset}/download", method = RequestMethod.GET, produces = "application/json")

@@ -35,6 +35,9 @@ public interface DatasetCustomView {
     @Value("#{(@timestampConverter.convert(target.updateDdtt))}")
     String getUpdateDate();
 
-    @Value("#{(target.dsCategory)}/" + "#{(target.dsCode)}" + "/download?format=csv&from=" + "#{@timestampConverter.convert(target.dsStartDdtt)}" + "&to=" + "#{@timestampConverter.convert(target.dsEndDdtt)}")
+    @Value("#{(target.category.ctgrCode)}")
+    String getCategoryCode();
+
+    @Value("#{(target.category.ctgrCode)}/" + "#{(target.dsCode)}" + "/download?format=csv&from=" + "#{@timestampConverter.convert(target.dsStartDdtt)}" + "&to=" + "#{@timestampConverter.convert(target.dsEndDdtt)}")
     String getDownloadLink();
 }

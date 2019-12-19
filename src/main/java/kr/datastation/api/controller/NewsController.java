@@ -48,8 +48,8 @@ public class NewsController {
     public NewsNamedEntityList getEntityByName(@RequestParam(value = "entity") @Valid EntityName entityName,
                                                @DateRequestParam(point = TimePoint.FROM) String from,
                                                @DateRequestParam(point = TimePoint.FROM) String to,
-                                               @RequestParam(required = true) int page,
-                                               @RequestParam(required = true) int size) {
+                                               @RequestParam int page,
+                                               @RequestParam int size) {
         // from: (page-1)*size, size: size
         return elasticSearchService.getEntityByName(entityName.getEntityName(), from, to, page, size);
     }
@@ -59,7 +59,7 @@ public class NewsController {
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
     @RequestMapping(value = "/entity/summary", method = RequestMethod.GET)
-    public List<NewsNamedEntitySummaryList> getEntitySummary(String query,
+    public List<NewsNamedEntitySummaryList> getEntitySummary(@RequestParam String query,
                                                              @DateRequestParam(point = TimePoint.FROM) String from,
                                                              @DateRequestParam(point = TimePoint.TO) String to,
                                                              @RequestParam(value = "size", defaultValue = "100") int size) {
@@ -75,7 +75,7 @@ public class NewsController {
     })
     @RequestMapping(value = "/entity/download", method = RequestMethod.GET)
     public void downloadFullEntity(HttpServletResponse response,
-                                   @RequestParam(required = true) String query,
+                                   @RequestParam String query,
                                    @DateRequestParam(point = TimePoint.FROM) String from,
                                    @DateRequestParam(point = TimePoint.TO) String to,
                                    @RequestParam(value = "size", defaultValue = "1000") int size,
@@ -95,7 +95,7 @@ public class NewsController {
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
     @RequestMapping(value = "/topic", method = RequestMethod.GET)
-    public List<Map<String, String>> getTopic(String query,
+    public List<Map<String, String>> getTopic(@RequestParam String query,
                                               @DateRequestParam(point = TimePoint.FROM) String from,
                                               @DateRequestParam(point = TimePoint.TO) String to,
                                               @RequestParam(defaultValue = "100") int size,
@@ -109,7 +109,7 @@ public class NewsController {
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
     @RequestMapping(value = "/related", method = RequestMethod.GET)
-    public List<Map<String, String>> getRelatedTopic(String query,
+    public List<Map<String, String>> getRelatedTopic(@RequestParam String query,
                                                      @DateRequestParam(point = TimePoint.FROM) String from,
                                                      @DateRequestParam(point = TimePoint.TO) String to,
                                                      @RequestParam(defaultValue = "10") int size,
@@ -123,7 +123,8 @@ public class NewsController {
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
     @RequestMapping(value = "/related/download", method = RequestMethod.GET)
-    public void downloadFullRelatedTopic(HttpServletResponse response, String query,
+    public void downloadFullRelatedTopic(HttpServletResponse response,
+                                         @RequestParam String query,
                                          @DateRequestParam(point = TimePoint.FROM) String from,
                                          @DateRequestParam(point = TimePoint.TO) String to,
                                          @RequestParam(defaultValue = "100") int size,
@@ -143,7 +144,8 @@ public class NewsController {
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
     @RequestMapping(value = "/topic/download", method = RequestMethod.GET)
-    public void downloadTopic(HttpServletResponse response, String query,
+    public void downloadTopic(HttpServletResponse response,
+                              @RequestParam String query,
                               @DateRequestParam(point = TimePoint.FROM) String from,
                               @DateRequestParam(point = TimePoint.TO) String to,
                               @RequestParam(defaultValue = "100") int size,
@@ -158,8 +160,14 @@ public class NewsController {
             httpResponseCsvWriter.write(entry.get("name") + ", " + entry.get("count"));
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
+    })
     @RequestMapping(value = "/timeline/summary", method = RequestMethod.GET, produces = "application/json")
-    public List<Long> getTimelineSummary(String query, String from, String to) {
+    public List<Long> getTimelineSummary(@RequestParam String query,
+                                         @DateRequestParam(point = TimePoint.FROM) String from,
+                                         @DateRequestParam(point = TimePoint.TO) String to) {
         final List<String> intervals = Arrays.asList("1d", "1w", "1m");
 
         List<Long> resultList = new ArrayList<>();
