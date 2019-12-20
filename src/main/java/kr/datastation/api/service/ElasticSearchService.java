@@ -24,10 +24,15 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.Cacheable;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -41,36 +46,6 @@ public class ElasticSearchService {
     @Autowired
     public ElasticSearchService(ElasticsearchTemplate elasticsearchTemplate) {
         this.elasticsearchTemplate = elasticsearchTemplate;
-    }
-
-    public List<Map<String, String>> getTopicSummary(String query, String from, String to, int size) {
-        TermsBuilder termsBuilder = AggregationBuilders.terms("agg").field("topics").size(size);
-
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-                .query(QueryBuilders.rangeQuery("written_time")
-                        .from(from + "000000")
-                        .to(to + "235959")
-                        .format("yyyyMMddHHmmss")
-                        .includeLower(true)
-                        .includeUpper(true))
-                .query(QueryBuilders.queryStringQuery(query)
-                        .defaultOperator(QueryStringQueryBuilder.Operator.AND)
-                        .defaultField("content"))
-                .size(0)
-                .sort("written_time", SortOrder.DESC)
-                .aggregation(termsBuilder);
-
-        SearchRequest searchRequest = new SearchRequest(NEWS_IDX).source(searchSourceBuilder);
-        SearchResponse searchResponse = elasticsearchTemplate.getClient().search(searchRequest).actionGet();
-
-        final List<Map<String, String>> result = new ArrayList<>();
-        Terms terms = searchResponse.getAggregations().get("agg");
-        for (Terms.Bucket bucket : terms.getBuckets()) {
-            Map<String, String> entity = new LinkedHashMap<>();
-            entity.put("data", String.valueOf(bucket.getKey()));
-            result.add(entity);
-        }
-        return result;
     }
 
     /**
@@ -87,7 +62,7 @@ public class ElasticSearchService {
         TermsBuilder termsBuilder = AggregationBuilders
                 .terms("agg")
                 .field("topics")
-                .size(size)
+                .size(size) // the number of buckets
                 .subAggregation(AggregationBuilders
                         .dateHistogram("date_hist")
                         .format("yyyyMMdd")
@@ -96,17 +71,15 @@ public class ElasticSearchService {
                         .order(Histogram.Order.COUNT_DESC));
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-                .query(QueryBuilders.rangeQuery("written_time")
+                .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("written_time")
                         .from(from + "000000")
                         .to(to + "235959")
                         .format("yyyyMMddHHmmss")
                         .includeLower(true)
-                        .includeUpper(true))
-                .query(QueryBuilders.queryStringQuery(query)
+                        .includeUpper(true)).must(QueryBuilders.queryStringQuery(query)
                         .defaultOperator(QueryStringQueryBuilder.Operator.AND)
-                        .defaultField("content"))
+                        .defaultField("content")))
                 .size(0)
-                .sort("written_time", SortOrder.DESC)
                 .aggregation(termsBuilder);
 
         SearchRequest searchRequest = new SearchRequest(NEWS_IDX).source(searchSourceBuilder);
@@ -118,52 +91,23 @@ public class ElasticSearchService {
         for (Terms.Bucket bucket : terms.getBuckets()) {
             Map<String, String> entity = new LinkedHashMap<>();
             Histogram histogram = bucket.getAggregations().get("date_hist");
-            entity.put("date", histogram.getBuckets().get(0).getKeyAsString());
+            entity.put("date", histogram.getBuckets().get(0).getKeyAsString()); // select one with the highest count
             entity.put("name", bucket.getKeyAsString());
             entity.put("count", String.valueOf(bucket.getDocCount()));
             result.add(entity);
         }
 
-        final int i = sort.toString().equalsIgnoreCase("desc") ? -1 : 1;
-        result.sort((o1, o2) -> {
-            if (o1.get("date").compareTo(o2.get("date")) > 0) return i;
-            else if (o1.get("date").compareTo(o2.get("date")) < 0) return i * (-1);
-            else return 0;
-        });
+        // only if you want to order them by date field
+//        final int i = sort.toString().equalsIgnoreCase("desc") ? -1 : 1;
+//        result.sort((o1, o2) -> {
+//            if (o1.get("date").compareTo(o2.get("date")) > 0) return i;
+//            else if (o1.get("date").compareTo(o2.get("date")) < 0) return i * (-1);
+//            else return 0;
+//        });
         return result;
     }
 
-    public List<Map<String, String>> getRelatedTopicSummary(String query, String from, String to, int size) {
-        TermsBuilder termsBuilder = AggregationBuilders.terms("agg").field("actions").size(size);
-
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-                .query(QueryBuilders.rangeQuery("written_time")
-                        .from(from + "000000")
-                        .to(to + "235959")
-                        .format("yyyyMMddHHmmss")
-                        .includeLower(true)
-                        .includeUpper(true))
-                .query(QueryBuilders.queryStringQuery(query)
-                        .defaultOperator(QueryStringQueryBuilder.Operator.AND)
-                        .defaultField("content"))
-                .size(0)
-                .sort("written_time", SortOrder.DESC)
-                .aggregation(termsBuilder);
-
-        SearchRequest searchRequest = new SearchRequest(NEWS_IDX).source(searchSourceBuilder);
-        SearchResponse searchResponse = elasticsearchTemplate.getClient().search(searchRequest).actionGet();
-
-        final List<Map<String, String>> result = new ArrayList<>();
-        Terms terms = searchResponse.getAggregations().get("agg");
-        for (Terms.Bucket bucket : terms.getBuckets()) {
-            Map<String, String> entity = new LinkedHashMap<>();
-            entity.put("data", String.valueOf(bucket.getKey()));
-            result.add(entity);
-        }
-        return result;
-    }
-
-    public List<Map<String, String>> getRelatedTopic(String query, String from, String to, int size, SortOrder sort) {
+    public List<Map<String, String>> getRelatedTopic(String query, String from, String to, int size, int bsize, SortBy sortBy) {
         DateHistogramInterval dateHistogramInterval = new DateHistogramInterval("1d");
         TermsBuilder termsBuilder = AggregationBuilders
                 .terms("agg")
@@ -177,17 +121,15 @@ public class ElasticSearchService {
                         .order(Histogram.Order.COUNT_DESC));
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-                .query(QueryBuilders.rangeQuery("written_time")
+                .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("written_time")
                         .from(from + "000000")
                         .to(to + "235959")
                         .format("yyyyMMddHHmmss")
                         .includeLower(true)
-                        .includeUpper(true))
-                .query(QueryBuilders.queryStringQuery(query)
+                        .includeUpper(true)).must(QueryBuilders.queryStringQuery(query)
                         .defaultOperator(QueryStringQueryBuilder.Operator.AND)
-                        .defaultField("content"))
+                        .defaultField("content")))
                 .size(0)
-                .sort("written_time", SortOrder.DESC)
                 .aggregation(termsBuilder);
 
         SearchRequest searchRequest = new SearchRequest(NEWS_IDX).source(searchSourceBuilder);
@@ -199,18 +141,23 @@ public class ElasticSearchService {
         for (Terms.Bucket bucket : terms.getBuckets()) {
             Map<String, String> entity = new LinkedHashMap<>();
             Histogram histogram = bucket.getAggregations().get("date_hist");
-            entity.put("date", histogram.getBuckets().get(0).getKeyAsString());
-            entity.put("name", bucket.getKeyAsString());
-            entity.put("count", String.valueOf(bucket.getDocCount()));
-            result.add(entity);
+            bsize = Math.min(histogram.getBuckets().size(), bsize);
+            for (int i = 0; i < bsize; ++i) {
+                entity.put("date", histogram.getBuckets().get(i).getKeyAsString());
+                entity.put("name", bucket.getKeyAsString());
+                entity.put("count", String.valueOf(bucket.getDocCount()));
+                result.add(entity);
+            }
         }
-
-        final int i = sort.toString().equalsIgnoreCase("desc") ? -1 : 1;
-        result.sort((o1, o2) -> {
-            if (o1.get("date").compareTo(o2.get("date")) > 0) return i;
-            else if (o1.get("date").compareTo(o2.get("date")) < 0) return i * (-1);
-            else return 0;
-        });
+        if (sortBy == SortBy.DATE) {
+            // only if you want to order them by date field
+            final int i = sort.toString().equalsIgnoreCase("desc") ? -1 : 1;
+            result.sort((o1, o2) -> {
+                if (o1.get("date").compareTo(o2.get("date")) > 0) return i;
+                else if (o1.get("date").compareTo(o2.get("date")) < 0) return i * (-1);
+                else return 0;
+            });
+        }
         return result;
     }
 
@@ -256,15 +203,14 @@ public class ElasticSearchService {
         TermsBuilder termsBuilder = AggregationBuilders.terms(entityName).field(entityName).size(size); // default size 10
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-                .query(QueryBuilders.rangeQuery("written_time")
+                .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("written_time")
                         .from(from)
                         .to(to)
                         .format("yyyyMMdd")
                         .includeLower(true)
-                        .includeUpper(true))
-                .query(QueryBuilders.queryStringQuery(query)
+                        .includeUpper(true)).must(QueryBuilders.queryStringQuery(query)
                         .defaultOperator(QueryStringQueryBuilder.Operator.AND)
-                        .defaultField("content"))
+                        .defaultField("content")))
                 .size(0)
                 .sort(new FieldSortBuilder("written_time").order(SortOrder.DESC))
                 .aggregation(termsBuilder);
@@ -289,15 +235,14 @@ public class ElasticSearchService {
         TermsBuilder termsBuilder = AggregationBuilders.terms(entityName).field(entityName).size(size); // default size 10
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-                .query(QueryBuilders.rangeQuery("written_time")
+                .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("written_time")
                         .from(from)
                         .to(to)
                         .format("yyyyMMdd")
                         .includeLower(true)
-                        .includeUpper(true))
-                .query(QueryBuilders.queryStringQuery(query)
+                        .includeUpper(true)).must(QueryBuilders.queryStringQuery(query)
                         .defaultOperator(QueryStringQueryBuilder.Operator.AND)
-                        .defaultField("content"))
+                        .defaultField("content")))
                 .size(0)
                 .sort(new FieldSortBuilder("written_time").order(SortOrder.DESC))
                 .aggregation(termsBuilder)
@@ -326,12 +271,12 @@ public class ElasticSearchService {
                 .must(QueryBuilders.existsQuery(entityName));
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-                .query(QueryBuilders.rangeQuery("written_time")
+                .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("written_time")
                         .from(from)
                         .to(to)
                         .format("yyyyMMdd")
                         .includeLower(true)
-                        .includeUpper(true))
+                        .includeUpper(true)))
                 .from(page)
                 .size(size)
                 .sort(new FieldSortBuilder("written_time").order(SortOrder.DESC))
@@ -347,5 +292,85 @@ public class ElasticSearchService {
             newsNamedEntityList.add(newsNamedEntity);
         }
         return newsNamedEntityList;
+    }
+
+    public List<TimeLineChart> getTimeLine(String query, String from, String to, String interval) throws ParseException {
+        final DateHistogramInterval dateHistogramInterval = new DateHistogramInterval(interval);
+        final NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder()
+                .withIndices(NEWS_IDX)
+                .withQuery(QueryBuilders.boolQuery()
+                        .must(QueryBuilders.rangeQuery("written_time")
+                                .from(from + "000000")
+                                .to(to + "235959")
+                                .format("yyyyMMddHHmmss")
+                                .includeLower(true)
+                                .includeUpper(true))
+                        .must(QueryBuilders.queryStringQuery(query)
+                        .defaultOperator(QueryStringQueryBuilder.Operator.AND)
+                        .defaultField("content")))
+                .withPageable(new PageRequest(0, 1))
+                .addAggregation(
+                        AggregationBuilders.dateHistogram("agg").format("yyyyMMdd").field("written_time")
+                                .interval(dateHistogramInterval)
+                                .order(Histogram.Order.KEY_ASC)
+                                .subAggregation(AggregationBuilders.terms("agg").field("actions").size(1))
+                );
+        final SearchQuery searchQuery = queryBuilder.build();
+        final Aggregations aggregations = elasticsearchTemplate.query(searchQuery, SearchResponse::getAggregations);
+        final Histogram agg = aggregations.get("agg");
+        return makeTimeLineChart(agg);
+    }
+
+    private List<TimeLineChart> makeTimeLineChart(Histogram agg) throws ParseException {
+        SimpleDateFormat toDateFormat = new SimpleDateFormat("yyyy.MM.dd");
+        SimpleDateFormat fromDateFormat = new SimpleDateFormat("yyyyMMdd");
+
+        final List<TimeLineChart> result = new ArrayList<>();
+        for (Histogram.Bucket entry : agg.getBuckets()) {
+            Terms terms = entry.getAggregations().get("agg");
+            if (terms.getBuckets().size() > 0) {
+                String action = terms.getBuckets().get(0).getKeyAsString();
+                result.add(new TimeLineChart(toDateFormat.format(fromDateFormat.parse(entry.getKeyAsString())), entry.getDocCount(), action));
+            }
+        }
+        return result;
+    }
+
+    public List<Map<String, String>> getDocumentCount(String query, String from, String to, String interval) {
+        final DateHistogramInterval dateHistogramInterval = new DateHistogramInterval(interval);
+        DateHistogramBuilder dateHistogramBuilder = AggregationBuilders
+                .dateHistogram("date_hist")
+                .format("yyyyMMdd")
+                .field("written_time")
+                .interval(dateHistogramInterval)
+                .order(Histogram.Order.KEY_ASC);
+
+        // Note: Use boolQuery().must() to apply range query, otherwise you will get the entire range dataset
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
+                .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("written_time")
+                        .from(from + "000000")
+                        .to(to + "235959")
+                        .format("yyyyMMddHHmmss")
+                        .includeLower(true)
+                        .includeUpper(true)).must(QueryBuilders.queryStringQuery(query)
+                        .defaultOperator(QueryStringQueryBuilder.Operator.AND)
+                        .defaultField("content")))
+                .size(0)
+                .sort("written_time", SortOrder.DESC)
+                .aggregation(dateHistogramBuilder);
+
+        SearchRequest searchRequest = new SearchRequest(NEWS_IDX).source(searchSourceBuilder);
+        SearchResponse searchResponse = elasticsearchTemplate.getClient().search(searchRequest).actionGet();
+
+        Histogram dateHist = searchResponse.getAggregations().get("date_hist");
+
+        final List<Map<String, String>> result = new ArrayList<>();
+        for (Histogram.Bucket bucket : dateHist.getBuckets()) {
+            Map<String, String> entry = new LinkedHashMap<>();
+            entry.put("yyyymm", bucket.getKeyAsString().substring(0, 6));
+            entry.put("doccnt", String.valueOf(bucket.getDocCount()));
+            result.add(entry);
+        }
+        return result;
     }
 }

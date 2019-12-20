@@ -4,11 +4,11 @@ import io.swagger.annotations.Api;
 import kr.datastation.api.repository.datastation.DatasetCustomView;
 import kr.datastation.api.repository.datastation.DatasetRepository;
 import kr.datastation.api.repository.dataset.WeatherDailyRepository;
+import kr.datastation.api.vo.SearchDatasetResult;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -29,8 +29,13 @@ public class DatasetController {
         this.weatherDailyRepository = weatherDailyRepository;
     }
 
+    @RequestMapping(value = "/latest", method = RequestMethod.GET)
+    public List<DatasetCustomView> getLatestDataset() {
+        return datasetRepository.findTop10ByOrderByUpdateDdttDesc();
+    }
+
     @RequestMapping(value = "/search", method = RequestMethod.GET)
-    public List<DatasetCustomView> searchDataset(HttpServletResponse response, @RequestParam String query) {
+    public SearchDatasetResult searchDataset(@RequestParam String query) {
         List<DatasetCustomView> datasetList = datasetRepository.findByDsDescContainingOrDsKeywordContaining(query, query);
 
         // TODO: generate download links for all dataset
@@ -51,14 +56,19 @@ public class DatasetController {
         String lastYearDate = simpleDateFormat.format(now.minusYears(1).toDate());
 
         StringBuilder downloadAllWeatherDatasetURL = new StringBuilder()
-                .append("/weather/download/multiple")
-                .append("&from=")
+                .append("/weather/download/multiple?")
+                .append("from=")
                 .append(lastYearDate)
                 .append("&to=")
                 .append(todayDate).append("&dataset=");
         datasetList.forEach(i -> downloadAllWeatherDatasetURL.append(i.getDsCode()).append(","));
         int length = downloadAllWeatherDatasetURL.length();
         String downloadURL = downloadAllWeatherDatasetURL.delete(length-1, length).toString();
-        return datasetList;
+
+        SearchDatasetResult searchDatasetResult = new SearchDatasetResult();
+        searchDatasetResult.setDownloadAllURL(downloadURL);
+        searchDatasetResult.setDatasetCustomViewList(datasetList);
+
+        return searchDatasetResult;
     }
 }

@@ -13,4 +13,6 @@ import java.util.List;
 public interface DatasetRepository extends JpaRepository<Dataset, Long> {
     // TODO: full text search
     List<DatasetCustomView> findByDsDescContainingOrDsKeywordContaining(String desc, String keyword);
+
+    List<DatasetCustomView> findTop10ByOrderByUpdateDdttDesc();
 }

@@ -44,11 +44,11 @@ public class WeatherController {
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("weather.csv", response);
 
         List<String> datasetList = dataset.stream().map(i -> i.replace("-", "_")).collect(Collectors.toList());
-        List<String> columnNames = Arrays.asList("w_date", "area_code", "main_name", "sub_name", "city_name");
+        List<String> columnNames = new ArrayList<>(Arrays.asList("w_date", "area_code", "main_name", "sub_name", "city_name"));
         columnNames.addAll(datasetList);
         httpResponseCsvWriter.setHeaders(columnNames);
 
-        List<Tuple> resultList = weatherDailyRepository.findByColumnNameAndByWDateBetweenAndByAreaCode(columnNames, from, to, null);
+        List<Tuple> resultList = weatherDailyRepository.findByColumnNameAndByWDateBetweenAndByAreaCode(datasetList, from, to, null);
         resultList.forEach(element -> httpResponseCsvWriter.write(CommonUtils.tupleToCSVFormat(element)));
         httpResponseCsvWriter.close();
     }

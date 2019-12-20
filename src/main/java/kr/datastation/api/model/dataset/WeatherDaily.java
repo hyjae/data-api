@@ -99,7 +99,7 @@ public class WeatherDaily implements Serializable {
     private Integer s08Hsnow;
 
     @Column(name = "s_09_ydust")
-    private Integer s09YDust;
+    private Integer s09Ydust;
 
     @Column(name = "s_10_resv")
     private Integer s10Resv;
