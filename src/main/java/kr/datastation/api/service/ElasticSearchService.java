@@ -57,7 +57,8 @@ public class ElasticSearchService {
      *      - Each record now has a date on which a topic occurs at most.
      *      - ex) "word", 15, "20190101"
      */
-    public List<Map<String, String>> getTopic(String query, String from, String to, int size, SortOrder sort) {
+    public List<Map<String, String>> getTopic(String query, String from, String to, int size, int bsize,
+                                              Histogram.Order histogramOrder, DocumentOrder documentOrder) {
         DateHistogramInterval dateHistogramInterval = new DateHistogramInterval("1d");
         TermsBuilder termsBuilder = AggregationBuilders
                 .terms("agg")
@@ -68,7 +69,7 @@ public class ElasticSearchService {
                         .format("yyyyMMdd")
                         .field("written_time")
                         .interval(dateHistogramInterval)
-                        .order(Histogram.Order.COUNT_DESC));
+                        .order(histogramOrder));
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
                 .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("written_time")
@@ -96,18 +97,20 @@ public class ElasticSearchService {
             entity.put("count", String.valueOf(bucket.getDocCount()));
             result.add(entity);
         }
-
-        // only if you want to order them by date field
-//        final int i = sort.toString().equalsIgnoreCase("desc") ? -1 : 1;
-//        result.sort((o1, o2) -> {
-//            if (o1.get("date").compareTo(o2.get("date")) > 0) return i;
-//            else if (o1.get("date").compareTo(o2.get("date")) < 0) return i * (-1);
-//            else return 0;
-//        });
+        if (bsize > 1) { // documents in a bucket are ordered by count desc by default
+            // only if you want to order them by date field
+            final int i = documentOrder.getDocumentOrder().equalsIgnoreCase("key_desc") ? -1 : 1;
+            result.sort((o1, o2) -> {
+                if (o1.get("date").compareTo(o2.get("date")) > 0) return i;
+                else if (o1.get("date").compareTo(o2.get("date")) < 0) return i * (-1);
+                else return 0;
+            });
+        }
         return result;
     }
 
-    public List<Map<String, String>> getRelatedTopic(String query, String from, String to, int size, int bsize, SortBy sortBy) {
+    public List<Map<String, String>> getRelatedTopic(String query, String from, String to, int size, int bsize,
+                                                     Histogram.Order histogramOrder, DocumentOrder documentOrder) {
         DateHistogramInterval dateHistogramInterval = new DateHistogramInterval("1d");
         TermsBuilder termsBuilder = AggregationBuilders
                 .terms("agg")
@@ -118,7 +121,7 @@ public class ElasticSearchService {
                         .format("yyyyMMdd")
                         .field("written_time")
                         .interval(dateHistogramInterval)
-                        .order(Histogram.Order.COUNT_DESC));
+                        .order(histogramOrder));
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
                 .query(QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("written_time")
@@ -149,9 +152,9 @@ public class ElasticSearchService {
                 result.add(entity);
             }
         }
-        if (sortBy == SortBy.DATE) {
+        if (bsize > 1) { // documents in a bucket are ordered by count desc by default
             // only if you want to order them by date field
-            final int i = sort.toString().equalsIgnoreCase("desc") ? -1 : 1;
+            final int i = documentOrder.getDocumentOrder().equalsIgnoreCase("key_desc") ? -1 : 1;
             result.sort((o1, o2) -> {
                 if (o1.get("date").compareTo(o2.get("date")) > 0) return i;
                 else if (o1.get("date").compareTo(o2.get("date")) < 0) return i * (-1);

@@ -8,7 +8,7 @@ import kr.datastation.api.validator.DateRequestParam;
 import kr.datastation.api.validator.EntityName;
 import kr.datastation.api.vo.*;
 import kr.datastation.api.service.ElasticSearchService;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.sql.Time;
 import java.text.ParseException;
 import java.util.*;
 
@@ -98,10 +97,11 @@ public class NewsController {
     public List<Map<String, String>> getTopic(@RequestParam String query,
                                               @DateRequestParam(point = TimePoint.FROM) String from,
                                               @DateRequestParam(point = TimePoint.TO) String to,
-                                              @RequestParam(defaultValue = "100") int size,
-                                              @RequestParam(value = "sort", defaultValue = "desc") String sort) {
-        SortOrder sortOrder = SortOrder.valueOf(sort.toUpperCase());
-        return elasticSearchService.getTopic(query, from, to, size, sortOrder);
+                                              @RequestParam(defaultValue = "100") int size) {
+        final int bsize = 1;
+        final DocumentOrder documentOrder = DocumentOrder.KEY_DESC;
+        final Histogram.Order histogramOrder = Histogram.Order.COUNT_DESC;
+        return elasticSearchService.getTopic(query, from, to, size, bsize, histogramOrder, documentOrder);
     }
 
     @ApiImplicitParams({
@@ -114,23 +114,27 @@ public class NewsController {
                                                      @DateRequestParam(point = TimePoint.TO) String to,
                                                      @RequestParam(defaultValue = "100") int size) {
         final int bsize = 1;
-        return elasticSearchService.getRelatedTopic(query, from, to, size, bsize, SortBy.COUNT);
+        final DocumentOrder documentOrder = DocumentOrder.KEY_DESC;
+        final Histogram.Order histogramOrder = Histogram.Order.COUNT_DESC;
+        return elasticSearchService.getRelatedTopic(query, from, to, size, bsize, histogramOrder, documentOrder);
     }
 
     @ApiImplicitParams({
             @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
-    @RequestMapping(value = "/related/download", method = RequestMethod.GET)
-    public void downloadRelatedTopicTop(HttpServletResponse response,
+    @RequestMapping(value = "/related/topn/download", method = RequestMethod.GET)
+    public void downloadRelatedTopicTopN(HttpServletResponse response,
                                         @RequestParam String query,
                                         @DateRequestParam(point = TimePoint.FROM) String from,
                                         @DateRequestParam(point = TimePoint.TO) String to,
                                         @RequestParam(defaultValue = "100") int size, // the number of buckets
-                                        @RequestParam(defaultValue = "1") int bsize) throws IOException { // each bucket size
-        // Note: sort by Histogram.Order.COUNT_DESC by default for each bucket
+                                        @RequestParam(defaultValue = "10") int bsize) throws IOException { // each bucket size
+        final DocumentOrder documentOrder = DocumentOrder.KEY_DESC;
+        final Histogram.Order histogramOrder = Histogram.Order.KEY_DESC;
+
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("related.csv", response);
-        List<Map<String, String>> relatedTopic = elasticSearchService.getRelatedTopic(query, from, to, size, bsize, SortBy.DATE);
+        List<Map<String, String>> relatedTopic = elasticSearchService.getRelatedTopic(query, from, to, size, bsize, histogramOrder, documentOrder);
 
         final List<String> headers = Arrays.asList("name", "date");
         httpResponseCsvWriter.setHeaders(headers);
@@ -142,40 +146,19 @@ public class NewsController {
             @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
-    @RequestMapping(value = "/related/download", method = RequestMethod.GET)
-    public void downloadRelatedTopic(HttpServletResponse response,
-                                     @RequestParam String query,
-                                     @DateRequestParam(point = TimePoint.FROM) String from,
-                                     @DateRequestParam(point = TimePoint.TO) String to,
-                                     @RequestParam(defaultValue = "100") int size,
-                                     @RequestParam(value = "sort", defaultValue = "desc") String sort) throws IOException {
-        SortOrder sortOrder = SortOrder.valueOf(sort.toUpperCase());
-        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("related.csv", response);
-        List<Map<String, String>> relatedTopic = elasticSearchService.getRelatedTopic(query, from, to, size, sortOrder);
-
-        final List<String> headers = Arrays.asList("name", "date");
-        httpResponseCsvWriter.setHeaders(headers);
-        for (Map<String, String> entry : relatedTopic)
-            httpResponseCsvWriter.write(entry.get("name") + ", " + entry.get("date"));
-    }
-
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
-            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
-    })
-    @RequestMapping(value = "/related/download", method = RequestMethod.GET)
+    @RequestMapping(value = "/related/spss/download", method = RequestMethod.GET)
     public void downloadRelatedTopicSPSS(HttpServletResponse response,
                                          @RequestParam String query,
                                          @DateRequestParam(point = TimePoint.FROM) String from,
                                          @DateRequestParam(point = TimePoint.TO) String to,
-                                         @RequestParam(defaultValue = "100") int size,
-                                         @RequestParam(value = "sort", defaultValue = "desc") String sort) throws IOException {
-        final int maxSize = 100000;
+                                         @RequestParam(defaultValue = "100") int size) throws IOException {
+        final int bsize = 1, maxSize = 100000;
         size = Math.min(maxSize, size);
+        final DocumentOrder documentOrder = DocumentOrder.KEY_DESC;
+        final Histogram.Order histogramOrder = Histogram.Order.COUNT_DESC;
 
-        SortOrder sortOrder = SortOrder.valueOf(sort.toUpperCase());
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("related.csv", response);
-        List<Map<String, String>> relatedTopic = elasticSearchService.getRelatedTopic(query, from, to, size, sortOrder);
+        List<Map<String, String>> relatedTopic = elasticSearchService.getRelatedTopic(query, from, to, size, bsize, histogramOrder, documentOrder);
 
         final List<String> headers = Arrays.asList("relword", "doccnt");
         httpResponseCsvWriter.setHeaders(headers);
@@ -192,11 +175,13 @@ public class NewsController {
                               @RequestParam String query,
                               @DateRequestParam(point = TimePoint.FROM) String from,
                               @DateRequestParam(point = TimePoint.TO) String to,
-                              @RequestParam(defaultValue = "100") int size,
-                              @RequestParam(value = "sort", defaultValue = "desc") String sort) throws IOException {
-        SortOrder sortOrder = SortOrder.valueOf(sort.toUpperCase());
+                              @RequestParam(defaultValue = "100") int size) throws IOException {
+        final int bsize = 1;
+        final DocumentOrder documentOrder = DocumentOrder.KEY_DESC;
+        final Histogram.Order histogramOrder = Histogram.Order.COUNT_DESC;
+
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("topic.csv", response);
-        List<Map<String, String>> topic = elasticSearchService.getTopic(query, from, to, size, sortOrder);
+        List<Map<String, String>> topic = elasticSearchService.getTopic(query, from, to, size, bsize, histogramOrder, documentOrder);
 
         final List<String> headers = Arrays.asList("subject", "doccnt");
         httpResponseCsvWriter.setHeaders(headers);
