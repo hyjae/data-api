@@ -11,6 +11,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
+import org.elasticsearch.script.Script;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -22,12 +23,17 @@ import org.elasticsearch.search.aggregations.metrics.cardinality.InternalCardina
 import org.elasticsearch.search.aggregations.pipeline.bucketmetrics.avg.AvgBucketBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.ScriptSortBuilder;
+import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
+import org.springframework.scripting.ScriptSource;
 import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.Cacheable;
 
@@ -266,9 +272,28 @@ public class ElasticSearchService {
         return newsNamedEntitySummaryList;
     }
 
-    public NewsNamedEntityList getEntityByName(String entityName, String from, String to, int page, int size) {
+    private List<SortBuilder> getEntityByNameHelper(String entityName, List<String> entitySortList) {
+        final String sortScript = "doc['" + entityName + "'].values.size()";
+
+        List<SortBuilder> sortBuilderList = new ArrayList<>();
+        for (String entitySort: entitySortList) {
+            if (entitySort.equalsIgnoreCase(EntitySort.DATE_ASC.getEntityOrder())) {
+                sortBuilderList.add(new FieldSortBuilder("written_time").order(SortOrder.ASC));
+            } else if (entitySort.equalsIgnoreCase(EntitySort.DATE_DESC.getEntityOrder())) {
+                sortBuilderList.add(new FieldSortBuilder("written_time").order(SortOrder.DESC));
+            } else if (entitySort.equalsIgnoreCase(EntitySort.ENTITY_ASC.getEntityOrder())) {
+                sortBuilderList.add(new ScriptSortBuilder(new Script(sortScript), "number").order(SortOrder.ASC));
+            } else {
+                sortBuilderList.add(new ScriptSortBuilder(new Script(sortScript), "number").order(SortOrder.DESC));
+            }
+        }
+        return sortBuilderList;
+    }
+
+    public NewsNamedEntityList getEntityByName(String query, String entityName, String from, String to, int page, int size, List<String> entitySortList) {
 
         final String[] includeFields = new String[] {"title", "link", "written_time", entityName};
+        final List<SortBuilder> entityByNameHelper = getEntityByNameHelper(entityName, entitySortList);
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
                 .must(QueryBuilders.existsQuery(entityName));
@@ -279,10 +304,13 @@ public class ElasticSearchService {
                         .to(to)
                         .format("yyyyMMdd")
                         .includeLower(true)
-                        .includeUpper(true)))
+                        .includeUpper(true)).must(QueryBuilders.queryStringQuery(query)
+                        .defaultOperator(QueryStringQueryBuilder.Operator.AND)
+                        .defaultField("content")))
                 .from(page)
                 .size(size)
-                .sort(new FieldSortBuilder("written_time").order(SortOrder.DESC))
+                .sort(entityByNameHelper.get(0)) // TODO: poor performance
+                .sort(entityByNameHelper.get(1))
                 .query(boolQueryBuilder).fetchSource(includeFields, null);
 
         SearchRequest searchRequest = new SearchRequest(NEWS_IDX).source(searchSourceBuilder);

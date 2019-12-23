@@ -3,9 +3,11 @@ package kr.datastation.api.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiParam;
 import kr.datastation.api.util.HttpResponseCSVWriter;
 import kr.datastation.api.validator.DateRequestParam;
 import kr.datastation.api.validator.EntityName;
+import kr.datastation.api.validator.EntitySortRequestParam;
 import kr.datastation.api.vo.*;
 import kr.datastation.api.service.ElasticSearchService;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
@@ -44,13 +46,37 @@ public class NewsController {
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
     @RequestMapping(value = "/entity/name", method = RequestMethod.GET)
-    public NewsNamedEntityList getEntityByName(@RequestParam(value = "entity") @Valid EntityName entityName,
+    public NewsNamedEntityList getEntityByName(@RequestParam String query,
+                                               @RequestParam(value = "entity") @Valid EntityName entityName,
                                                @DateRequestParam(point = TimePoint.FROM) String from,
-                                               @DateRequestParam(point = TimePoint.FROM) String to,
-                                               @RequestParam int page,
+                                               @DateRequestParam(point = TimePoint.TO) String to,
+                                               @RequestParam(defaultValue = "date.desc,entity.desc") List<String> sort, // TODO: validator
+                                               @RequestParam int page, // from: (page-1)*size, size: size
                                                @RequestParam int size) {
-        // from: (page-1)*size, size: size
-        return elasticSearchService.getEntityByName(entityName.getEntityName(), from, to, page, size);
+        return elasticSearchService.getEntityByName(query, entityName.getEntityName(), from, to, page, size, sort);
+    }
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211")
+    })
+    @RequestMapping(value = "/entity/name/download", method = RequestMethod.GET)
+    public void downloadEntityByName(HttpServletResponse response,
+                                     @RequestParam String query,
+                                     @RequestParam(value = "entity") @Valid EntityName entityName,
+                                     @DateRequestParam(point = TimePoint.FROM) String from,
+                                     @DateRequestParam(point = TimePoint.TO) String to,
+                                     @RequestParam(defaultValue = "date.desc,entity.desc") List<String> sort, // TODO: validator, swagger bug
+                                     @RequestParam(defaultValue = "csv") String format) throws IOException { // TODO: file format
+        final int page = 0, size = 100000;
+        final List<String> headers = Arrays.asList("headline", "entity", "date");
+        HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("entity.csv", response);
+        httpResponseCsvWriter.setHeaders(headers);
+
+        NewsNamedEntityList entityByName = elasticSearchService.getEntityByName(query, entityName.getEntityName(), from, to, page, size, sort);
+        List<NewsNamedEntity> newsNamedEntityList = entityByName.getNewsNamedEntityList();
+        newsNamedEntityList.forEach(element -> httpResponseCsvWriter.write(element.toCSV()));
+        httpResponseCsvWriter.close();
     }
 
     @ApiImplicitParams({
@@ -72,8 +98,8 @@ public class NewsController {
             @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
-    @RequestMapping(value = "/entity/download", method = RequestMethod.GET)
-    public void downloadFullEntity(HttpServletResponse response,
+    @RequestMapping(value = "/entity/spss/download", method = RequestMethod.GET)
+    public void downloadEntitySPSS(HttpServletResponse response,
                                    @RequestParam String query,
                                    @DateRequestParam(point = TimePoint.FROM) String from,
                                    @DateRequestParam(point = TimePoint.TO) String to,

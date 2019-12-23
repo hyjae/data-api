@@ -1,6 +1,6 @@
 package kr.datastation.api.controller;
 
-import kr.datastation.api.exception.AppException;
+import kr.datastation.api.advice.AppException;
 import kr.datastation.api.model.user.Role;
 import kr.datastation.api.model.user.RoleName;
 import kr.datastation.api.model.user.User;

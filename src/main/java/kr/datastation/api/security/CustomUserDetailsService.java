@@ -1,6 +1,6 @@
 package kr.datastation.api.security;
 
-import kr.datastation.api.exception.ResourceNotFoundException;
+import kr.datastation.api.advice.ResourceNotFoundException;
 import kr.datastation.api.model.user.User;
 import kr.datastation.api.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

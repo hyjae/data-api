@@ -1,4 +1,4 @@
-package kr.datastation.api.exception;
+package kr.datastation.api.advice;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
