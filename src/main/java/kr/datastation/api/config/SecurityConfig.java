@@ -79,7 +79,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .and()
                 // don't authenticate this particular request
                 .authorizeRequests()
-                      .antMatchers("/**").permitAll();
+                      .antMatchers("/**").permitAll()
 //                    .antMatchers("/v2/api-docs",
 //                            "/configuration/ui",
 //                            "/swagger-resources/**",
@@ -87,6 +87,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //                            "/swagger-ui.html",
 //                            "/webjars/**")
 //                        .permitAll()
+                      .antMatchers("/*/*/download").denyAll();
 //                    .antMatchers("/**").authenticated()
 //                    .antMatchers("/",
 //                        "/favicon.ico",

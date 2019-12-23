@@ -276,7 +276,7 @@ public class ElasticSearchService {
         final String sortScript = "doc['" + entityName + "'].values.size()";
 
         List<SortBuilder> sortBuilderList = new ArrayList<>();
-        for (String entitySort: entitySortList) {
+        for (String entitySort: entitySortList)
             if (entitySort.equalsIgnoreCase(EntitySort.DATE_ASC.getEntityOrder())) {
                 sortBuilderList.add(new FieldSortBuilder("written_time").order(SortOrder.ASC));
             } else if (entitySort.equalsIgnoreCase(EntitySort.DATE_DESC.getEntityOrder())) {
@@ -286,7 +286,6 @@ public class ElasticSearchService {
             } else {
                 sortBuilderList.add(new ScriptSortBuilder(new Script(sortScript), "number").order(SortOrder.DESC));
             }
-        }
         return sortBuilderList;
     }
 
