@@ -21,6 +21,13 @@ public class NewsNamedEntity {
     @SerializedName(value = "organizationNamedEntity", alternate = {"locationNamedEntity", "personNamedEntity", "etcNamedEntity", "totalNamedEntity"})
     private List<String> namedEntityList;
 
+    public String getWrittenTime() {
+        try {
+            return writtenTime.substring(0, 8);
+        } catch(IndexOutOfBoundsException e) {}
+        return writtenTime;
+    }
+
     public String toCSV() {
         String titleWithNoComma = this.title.replace(",", " ");
         String writtenTime = "";

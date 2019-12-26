@@ -15,4 +15,6 @@ public interface DatasetRepository extends JpaRepository<Dataset, Long> {
     List<DatasetCustomView> findByDsDescContainingOrDsKeywordContaining(String desc, String keyword);
 
     List<DatasetCustomView> findTop10ByOrderByUpdateDdttDesc();
+
+    List<DatasetCustomView> findTop10ByOrderByDownloadCountDesc();
 }

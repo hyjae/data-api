@@ -22,7 +22,7 @@ public class EntityNameConstraintValidator implements ConstraintValidator<ValidE
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
         if (!namedEntityList.contains(s)) {
-            String namedEntity = namedEntityList.stream().collect(Collectors.joining(" ,"));
+            String namedEntity = namedEntityList.stream().collect(Collectors.joining(", "));
             StringBuilder message = new StringBuilder()
                     .append(s)
                     .append(" not in: ")

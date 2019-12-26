@@ -3,10 +3,27 @@ package kr.datastation.api.util;
 import javax.persistence.Tuple;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
 public class CommonUtils {
+
+    static public Long getTimeDiffAsDay(String from, String to, String format) throws IllegalArgumentException {
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+        final LocalDate fromDate = LocalDate.parse(from, formatter);
+        final LocalDate toDate = LocalDate.parse(to, formatter);
+
+        Period period = Period.between(fromDate, toDate);
+        System.out.println("Years " + period.getYears());  //Years 2
+        System.out.println("Months " + period.getMonths()); //Months 1
+        System.out.println("Days " + period.getDays()); //Days 11
+
+        return ChronoUnit.DAYS.between(fromDate, toDate);
+    }
 
     static public Date convertToDate(String date, String format) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);

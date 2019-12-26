@@ -87,7 +87,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //                            "/swagger-ui.html",
 //                            "/webjars/**")
 //                        .permitAll()
-                      .antMatchers("/*/*/download").denyAll();
+                      .antMatchers("/news/entity/name/download/**").denyAll()
+                      .antMatchers("/news/related/download/**").denyAll()
+                      .antMatchers("/news/timeline/download/**").denyAll()
+                      .antMatchers("/news/topic/download/**").denyAll()
+                      .antMatchers("/weather/*/download/**").denyAll()
+                      .antMatchers("/weather/download/**").denyAll();
 //                    .antMatchers("/**").authenticated()
 //                    .antMatchers("/",
 //                        "/favicon.ico",

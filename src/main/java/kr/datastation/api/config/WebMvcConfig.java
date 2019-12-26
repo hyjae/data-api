@@ -1,7 +1,6 @@
 package kr.datastation.api.config;
 
 import kr.datastation.api.validator.DateHandlerResolver;
-import kr.datastation.api.validator.EntitySortHandlerResolver;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -15,7 +14,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         argumentResolvers.add(new DateHandlerResolver());
-        argumentResolvers.add(new EntitySortHandlerResolver());
     }
 
     // security

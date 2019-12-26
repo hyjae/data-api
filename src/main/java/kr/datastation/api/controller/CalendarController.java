@@ -34,7 +34,7 @@ public class CalendarController {
         this.calendarRepository = calendarRepository;
     }
 
-    @RequestMapping(value = "/download", method = RequestMethod.GET)
+    @RequestMapping(value = {"/calendar/download", "/spss/download"}, method = RequestMethod.GET)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),

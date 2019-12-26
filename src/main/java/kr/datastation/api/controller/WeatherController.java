@@ -35,12 +35,12 @@ public class WeatherController {
             @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
-    @RequestMapping(value = "/download/multiple", method = RequestMethod.GET, produces = "application/json")
-    public void downloadMultipleWeatherDataset(HttpServletResponse response,
-                                       @RequestParam List<String> dataset,
-                                       @RequestParam(required = false, defaultValue = "csv") String format,
-                                       @DateRequestParam(point = TimePoint.FROM) String from,
-                                       @DateRequestParam(point = TimePoint.TO) String to) throws IOException, IllegalArgumentException {
+    @RequestMapping(value = "/download", method = RequestMethod.GET, produces = "application/json")
+    public void downloadMultipleWeather(HttpServletResponse response,
+                                        @RequestParam List<String> dataset,
+                                        @RequestParam(required = false, defaultValue = "csv") String format,
+                                        @DateRequestParam(point = TimePoint.FROM) String from,
+                                        @DateRequestParam(point = TimePoint.TO) String to) throws IOException, IllegalArgumentException {
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("weather.csv", response);
 
         List<String> datasetList = dataset.stream().map(i -> i.replace("-", "_")).collect(Collectors.toList());
@@ -58,12 +58,12 @@ public class WeatherController {
             @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
-    public void downloadWeatherDataset(HttpServletResponse response,
-                                       @PathVariable String dataset,
-                                       @RequestParam(required = false, defaultValue = "csv") String format,
-                                       @DateRequestParam(point = TimePoint.FROM) String from,
-                                       @DateRequestParam(point = TimePoint.TO) String to,
-                                       @RequestParam(value = "areacode", required = false) Integer[] areaCode) throws IOException, IllegalArgumentException {
+    public void downloadWeather(HttpServletResponse response,
+                                @PathVariable String dataset,
+                                @RequestParam(required = false, defaultValue = "csv") String format,
+                                @DateRequestParam(point = TimePoint.FROM) String from,
+                                @DateRequestParam(point = TimePoint.TO) String to,
+                                @RequestParam(value = "areacode", required = false) Integer[] areaCode) throws IOException, IllegalArgumentException {
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("weather.csv", response);
 
         String datasetName = dataset.replace("-", "_");
@@ -76,16 +76,16 @@ public class WeatherController {
         httpResponseCsvWriter.close();
     }
 
-    @RequestMapping(value = "/download", method = RequestMethod.GET)
+    @RequestMapping(value = "/spss/download", method = RequestMethod.GET)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
-    public void downloadFullWeatherDataset(HttpServletResponse response,
-                                           @RequestParam(required = false, defaultValue = "csv") String format,
-                                           @DateRequestParam(point = TimePoint.FROM) String from,
-                                           @DateRequestParam(point = TimePoint.TO) String to,
-                                           @RequestParam(value = "areacode", required = false) Integer[] areaCode) throws IOException {
+    public void downloadFullWeatherSPSS(HttpServletResponse response,
+                                        @RequestParam(required = false, defaultValue = "csv") String format,
+                                        @DateRequestParam(point = TimePoint.FROM) String from,
+                                        @DateRequestParam(point = TimePoint.TO) String to,
+                                        @RequestParam(value = "areacode", required = false) Integer[] areaCode) throws IOException {
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("weather.csv", response);
 
         List<String> columnNames = ReflectionUtils.getColumnNames(WeatherDaily.class);

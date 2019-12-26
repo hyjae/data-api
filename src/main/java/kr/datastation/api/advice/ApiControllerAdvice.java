@@ -24,14 +24,14 @@ import java.util.Collection;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @ControllerAdvice(assignableTypes = {NewsController.class, WeatherController.class, DateHandlerResolver.class, WeatherDailyRepositoryImpl.class})
 public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        ApiError apiError = new ApiError(NOT_FOUND);
+        ApiError apiError = new ApiError(BAD_REQUEST);
         String message = ex.getMessage();
         apiError.setMessage(message);
         return buildResponseEntity(apiError);
@@ -39,7 +39,7 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({MethodArgumentTypeMismatchException.class})
     public ResponseEntity<?> methodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        ApiError apiError = new ApiError(NOT_FOUND);
+        ApiError apiError = new ApiError(BAD_REQUEST);
         String message = e.getMessage();
         apiError.setMessage(message);
         return buildResponseEntity(apiError);
@@ -47,7 +47,7 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({IllegalStateException.class})
     public ResponseEntity<?> illegalStateExceptionHandler(IllegalStateException e) {
-        ApiError apiError = new ApiError(NOT_FOUND);
+        ApiError apiError = new ApiError(BAD_REQUEST);
         String message = e.getMessage();
         apiError.setMessage(message);
         return buildResponseEntity(apiError);
@@ -55,7 +55,7 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({InvalidDataAccessApiUsageException.class})
     public ResponseEntity<?> invalidDataAccessApiUsageExceptionHandler(InvalidDataAccessApiUsageException e) {
-        ApiError apiError = new ApiError(NOT_FOUND);
+        ApiError apiError = new ApiError(BAD_REQUEST);
         String message = e.getMessage();
         apiError.setMessage(message);
         return buildResponseEntity(apiError);
@@ -63,7 +63,7 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({IllegalArgumentException.class})
     public ResponseEntity<?> illegalArgumentExceptionHandler(IllegalArgumentException e) {
-        ApiError apiError = new ApiError(NOT_FOUND);
+        ApiError apiError = new ApiError(BAD_REQUEST);
         String message = e.getMessage();
         apiError.setMessage(message);
         return buildResponseEntity(apiError);
@@ -71,7 +71,7 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({ConstraintViolationException.class})
     public ResponseEntity<?> invalidParamsExceptionHandler(ConstraintViolationException e) {
-        ApiError apiError = new ApiError(NOT_FOUND);
+        ApiError apiError = new ApiError(BAD_REQUEST);
         String message = resolveConstraintViolations(e.getConstraintViolations());
         apiError.setMessage(message);
         return buildResponseEntity(apiError);
@@ -81,7 +81,7 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         String error = "Malformed JSON request";
-        return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, error, ex));
+        return buildResponseEntity(new ApiError(BAD_REQUEST, error, ex));
     }
 
     private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {

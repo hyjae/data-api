@@ -1,6 +1,7 @@
 package kr.datastation.api.repository.dataset;
 
 
+import kr.datastation.api.advice.ResourceNotFoundException;
 import kr.datastation.api.model.dataset.WeatherArea;
 import kr.datastation.api.model.dataset.WeatherArea_;
 import kr.datastation.api.model.dataset.WeatherDaily;
@@ -63,8 +64,12 @@ public class WeatherDailyRepositoryImpl implements WeatherDailyRepositoryCustom 
         s.add(weatherArea.get(WeatherArea_.subName));
         s.add(weatherArea.get(WeatherArea_.cityName));
 
-        for (String columnName : columnNames) { // TODO: exception
-            s.add(weatherDaily.get(CaseUtils.toCamelCase(columnName, false, '_')));
+        for (String columnName : columnNames) { // TODO:
+            try {
+                s.add(weatherDaily.get(CaseUtils.toCamelCase(columnName, false, '_')));
+            } catch (IllegalArgumentException e) {
+                throw new ResourceNotFoundException(columnName, "dataset", columnName);
+            }
         }
         cq.multiselect(s).where(predicates.toArray(new Predicate[]{}));
         cq.orderBy(orderByAreaCode, orderByWDate);

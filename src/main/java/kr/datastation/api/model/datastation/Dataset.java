@@ -70,6 +70,9 @@ public class Dataset {
     @Column(name = "domain_id")
     Integer domainId;
 
+    @Column(name = "download_count")
+    Integer downloadCount;
+
     @Column(name = "insert_ddtt")
     Timestamp insertDdtt;
 

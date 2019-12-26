@@ -9,6 +9,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class SearchDatasetResult {
-    String downloadAllURL;
+    List<String> downloadURLList;
     List<DatasetCustomView> datasetCustomViewList;
 }

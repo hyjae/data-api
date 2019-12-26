@@ -34,20 +34,19 @@ public class DatasetController {
         return datasetRepository.findTop10ByOrderByUpdateDdttDesc();
     }
 
+    @RequestMapping(value = "/popular", method = RequestMethod.GET)
+    public List<DatasetCustomView> getPopularDataset() {
+        // TODO: popular
+        return datasetRepository.findTop10ByOrderByDownloadCountDesc();
+    }
+
     @RequestMapping(value = "/search", method = RequestMethod.GET)
     public SearchDatasetResult searchDataset(@RequestParam String query) {
         List<DatasetCustomView> datasetList = datasetRepository.findByDsDescContainingOrDsKeywordContaining(query, query);
 
-        // TODO: generate download links for all dataset
-//        StringBuilder downloadAllURL = new StringBuilder();
-//        for (DatasetCustomView datasetCodeView : datasetList) {
-//            String dsCode = datasetCodeView.getDsCode();
-//            Set<CategoryDatasetMap> categoryDatasetMaps = datasetCodeView.getCategoryDatasetMaps();
-//            for (CategoryDatasetMap categoryDatasetMap : categoryDatasetMaps) {
-//                String ctgrCode = categoryDatasetMap.getCategory().getCtgrCode();
-//                datasetURLList.put(ctgrCode)
-//            }
-//        }
+        SearchDatasetResult searchDatasetResult = new SearchDatasetResult();
+        if (datasetList.isEmpty())
+            return searchDatasetResult;
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
         DateTime now = DateTime.now();
@@ -55,20 +54,15 @@ public class DatasetController {
         String todayDate = simpleDateFormat.format(now.toDate());
         String lastYearDate = simpleDateFormat.format(now.minusYears(1).toDate());
 
-        StringBuilder downloadAllWeatherDatasetURL = new StringBuilder()
-                .append("/weather/download/multiple?")
-                .append("from=")
-                .append(lastYearDate)
-                .append("&to=")
-                .append(todayDate).append("&dataset=");
-        datasetList.forEach(i -> downloadAllWeatherDatasetURL.append(i.getDsCode()).append(","));
-        int length = downloadAllWeatherDatasetURL.length();
-        String downloadURL = downloadAllWeatherDatasetURL.delete(length-1, length).toString();
-
-        SearchDatasetResult searchDatasetResult = new SearchDatasetResult();
-        searchDatasetResult.setDownloadAllURL(downloadURL);
+        List<String> downloadAllURL = new ArrayList<>();
+        String downloadURL = "%s/%s/download?format=csv&from=%s&to=%s";
+        for (DatasetCustomView datasetCodeView : datasetList) {
+            String categoryCode = datasetCodeView.getCategoryCode();
+            String dsCode = datasetCodeView.getDsCode();
+            downloadAllURL.add(String.format(downloadURL, categoryCode, dsCode, lastYearDate, todayDate));
+        }
+        searchDatasetResult.setDownloadURLList(downloadAllURL);
         searchDatasetResult.setDatasetCustomViewList(datasetList);
-
         return searchDatasetResult;
     }
 }
