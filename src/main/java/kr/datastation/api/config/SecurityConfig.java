@@ -78,21 +78,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                     .and()
                 // don't authenticate this particular request
+                // specific -> general
                 .authorizeRequests()
-                      .antMatchers("/**").permitAll()
+                    .antMatchers("calendar/calendar/download").authenticated()
+                    .antMatchers("/news/entity/download").authenticated()
+                    .antMatchers("/news/related/download").authenticated()
+                    .antMatchers("/news/timeline/download").authenticated()
+                    .antMatchers("/news/topic/download").authenticated()
+                    .antMatchers("/news/topic/rank/download").authenticated()
+                    .antMatchers("/weather/*/download").authenticated()
+                    .antMatchers("/weather/download").authenticated()
+                    .antMatchers("/**").permitAll();
 //                    .antMatchers("/v2/api-docs",
 //                            "/configuration/ui",
 //                            "/swagger-resources/**",
 //                            "/configuration/security",
 //                            "/swagger-ui.html",
 //                            "/webjars/**")
-//                        .permitAll()
-                      .antMatchers("/news/entity/name/download/**").denyAll()
-                      .antMatchers("/news/related/download/**").denyAll()
-                      .antMatchers("/news/timeline/download/**").denyAll()
-                      .antMatchers("/news/topic/download/**").denyAll()
-                      .antMatchers("/weather/*/download/**").denyAll()
-                      .antMatchers("/weather/download/**").denyAll();
+//                        .permitAll();
 //                    .antMatchers("/**").authenticated()
 //                    .antMatchers("/",
 //                        "/favicon.ico",
