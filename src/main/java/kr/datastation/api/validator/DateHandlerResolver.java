@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+
 public class DateHandlerResolver implements HandlerMethodArgumentResolver {
 
     private final String DATE_FORMAT = "yyyyMMdd";
@@ -29,7 +30,7 @@ public class DateHandlerResolver implements HandlerMethodArgumentResolver {
         String parameter = nativeWebRequest.getParameter(point.getTimePoint());
 
         if (parameter != null && !CommonUtils.isValidDateFormat(DATE_FORMAT, parameter))
-            throw new IllegalArgumentException(String.format("Invalid Format! Correct format: %s format.", DATE_FORMAT)); // TODO: global
+            throw new IllegalArgumentException(String.format("Invalid Format! Correct format: %s.", DATE_FORMAT)); // TODO: global
         else if (parameter == null)
             return setTime(DATE_FORMAT, point.getTimePoint());
         return parameter;
@@ -39,8 +40,9 @@ public class DateHandlerResolver implements HandlerMethodArgumentResolver {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("KST"));
 
+        // https://stackoverflow.com/questions/3838242/minimum-date-in-java
         if (timePoint.equalsIgnoreCase("from"))
-            return simpleDateFormat.format(new Date(0L)); // TODO: 1970
+            return simpleDateFormat.format(new Date(0L)); // 1970
         return simpleDateFormat.format(new Date());
     }
 }

@@ -36,7 +36,6 @@ public class DatasetController {
 
     @RequestMapping(value = "/popular", method = RequestMethod.GET)
     public List<DatasetCustomView> getPopularDataset() {
-        // TODO: popular
         return datasetRepository.findTop10ByOrderByDownloadCountDesc();
     }
 

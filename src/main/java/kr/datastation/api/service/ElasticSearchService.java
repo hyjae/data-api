@@ -14,7 +14,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.histogram.*;
@@ -22,30 +21,21 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
 import org.elasticsearch.search.aggregations.metrics.cardinality.InternalCardinality;
-import org.elasticsearch.search.aggregations.pipeline.bucketmetrics.avg.AvgBucketBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.ScriptSortBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
-import org.springframework.scripting.ScriptSource;
 import org.springframework.stereotype.Service;
-import org.springframework.cache.annotation.Cacheable;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 
 @Service
@@ -60,15 +50,6 @@ public class ElasticSearchService {
         this.elasticsearchTemplate = elasticsearchTemplate;
     }
 
-    /**
-     * Steps:
-     *  1. Aggregated by a list of topics; essentially this is the same as "GROUP BY topic"
-     *      - This returns a list of topics + the number occurrence in documents
-     *      - ex) "word", 15 => "word" shows up on 15 documents
-     *  2. Sub-aggregated by a date and order by the number of occurrence
-     *      - Each record now has a date on which a topic occurs at most.
-     *      - ex) "word", 15, "20190101"
-     */
     public List<Map<String, String>> getTopic(String query, String from, String to, int size, int bsize,
                                               Histogram.Order histogramOrder, DocumentOrder documentOrder) {
         DateHistogramInterval dateHistogramInterval = new DateHistogramInterval("1d");
@@ -199,20 +180,14 @@ public class ElasticSearchService {
 
         Terms terms = searchResponse.getAggregations().get("agg");
 
-        List<Map<String, String>> result = new ArrayList<>();
+        final List<Map<String, String>> result = new ArrayList<>();
         for (Terms.Bucket bucket : terms.getBuckets()) {
+            Map<String, String> entity = new LinkedHashMap<>();
             Histogram histogram = bucket.getAggregations().get("date_hist");
-            for (Histogram.Bucket subBucket : histogram.getBuckets()) {
-                long min = Math.min(subBucket.getDocCount(), bsize);
-                for (int i = 0; i < min; ++i) {
-                    Aggregations aggregations = subBucket.getAggregations();
-                    Map<String, String> entity = new LinkedHashMap<>();
-                    entity.put("date", subBucket.getKeyAsString());
-                    entity.put("name", subBucket.getKeyAsString());
-                    entity.put("count", String.valueOf(subBucket.getDocCount()));
-                    result.add(entity);
-                }
-            }
+            entity.put("date", histogram.getBuckets().get(0).getKeyAsString()); // select one with the highest count
+            entity.put("name", bucket.getKeyAsString());
+            entity.put("count", String.valueOf(bucket.getDocCount()));
+            result.add(entity);
         }
         if (bsize > 1) { // documents in a bucket are ordered by count desc by default
             // only if you want to order them by date field

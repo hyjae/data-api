@@ -2,6 +2,7 @@ package kr.datastation.api.model.user;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
@@ -45,10 +46,12 @@ public class User {
     private String password;
 
     @CreatedDate
+    @CreationTimestamp // insert CURRENT_TIMESTAMP automatically
     @Column(name = "created_at")
     private Timestamp createdAt;
 
     @LastModifiedDate
+    @CreationTimestamp // insert CURRENT_TIMESTAMP automatically
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 

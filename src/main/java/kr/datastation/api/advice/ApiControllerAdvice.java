@@ -85,7 +85,6 @@ public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
     }
 
     private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
-        ResponseEntity<String> stringResponseEntity = new ResponseEntity<>(new Gson().toJson(apiError), apiError.getStatus());
         return new ResponseEntity<>(new Gson().toJson(apiError), apiError.getStatus());
     }
 
