@@ -82,7 +82,6 @@ public class WeatherController {
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
     public void downloadFullWeatherSPSS(HttpServletResponse response,
-                                        @RequestParam(required = false, defaultValue = "csv") String format,
                                         @DateRequestParam(point = TimePoint.FROM) String from,
                                         @DateRequestParam(point = TimePoint.TO) String to,
                                         @RequestParam(value = "areacode", required = false) Integer[] areaCode) throws IOException {

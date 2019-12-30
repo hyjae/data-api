@@ -18,9 +18,9 @@ public class CommonUtils {
         final LocalDate toDate = LocalDate.parse(to, formatter);
 
         Period period = Period.between(fromDate, toDate);
-        System.out.println("Years " + period.getYears());  //Years 2
-        System.out.println("Months " + period.getMonths()); //Months 1
-        System.out.println("Days " + period.getDays()); //Days 11
+        System.out.println("Years " + period.getYears());  // Years 2
+        System.out.println("Months " + period.getMonths()); // Months 1
+        System.out.println("Days " + period.getDays()); // Days 11
 
         return ChronoUnit.DAYS.between(fromDate, toDate);
     }

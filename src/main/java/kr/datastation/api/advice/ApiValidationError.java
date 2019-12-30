@@ -1,4 +1,4 @@
-package kr.datastation.api.vo;
+package kr.datastation.api.advice;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

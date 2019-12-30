@@ -102,8 +102,7 @@ public class NewsController {
                                    @RequestParam String query,
                                    @DateRequestParam(point = TimePoint.FROM) String from,
                                    @DateRequestParam(point = TimePoint.TO) String to,
-                                   @RequestParam(value = "size", defaultValue = "1000") int size,
-                                   @RequestParam(defaultValue = "csv") String format) throws IOException {
+                                   @RequestParam(value = "size", defaultValue = "1000") int size) throws IOException {
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("entity.csv", response);
 
         final List<String> headers = Arrays.asList("entity", "entitykind", "doccnt");

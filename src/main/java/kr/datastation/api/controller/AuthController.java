@@ -7,7 +7,7 @@ import kr.datastation.api.model.user.User;
 import kr.datastation.api.repository.user.RoleRepository;
 import kr.datastation.api.repository.user.UserRepository;
 import kr.datastation.api.security.JwtTokenProvider;
-import kr.datastation.api.vo.ApiResponse;
+import kr.datastation.api.advice.ApiResponse;
 import kr.datastation.api.vo.JwtAuthenticationResponse;
 import kr.datastation.api.vo.LoginRequest;
 import kr.datastation.api.vo.SignUpRequest;

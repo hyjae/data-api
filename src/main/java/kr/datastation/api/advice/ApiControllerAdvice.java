@@ -3,7 +3,6 @@ package kr.datastation.api.advice;
 import com.google.gson.Gson;
 import kr.datastation.api.controller.NewsController;
 import kr.datastation.api.controller.WeatherController;
-import kr.datastation.api.vo.ApiError;
 import kr.datastation.api.repository.dataset.WeatherDailyRepositoryImpl;
 import kr.datastation.api.validator.DateHandlerResolver;
 import org.springframework.dao.InvalidDataAccessApiUsageException;

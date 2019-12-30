@@ -1,0 +1,1801 @@
+swagger: '2.0'
+info:
+  description: DataStation API
+  version: v0.01
+  title: DataStation API
+  termsOfService: Terms of service
+  contact:
+    name: N.A
+    url: N.A
+    email: N.A
+  license:
+    name: License of API
+    url: API license URL
+host: '192.168.210.131:7578'
+basePath: /
+tags:
+  - name: auth-controller
+    description: Auth Controller
+  - name: basic-error-controller
+    description: Basic Error Controller
+  - name: calendar-controller
+    description: Calendar Controller
+  - name: dataset-controller
+    description: Dataset Controller
+  - name: news-controller
+    description: News Controller
+  - name: user-controller
+    description: User Controller
+  - name: weather-controller
+    description: Weather Controller
+paths:
+  /api/auth/signin:
+    post:
+      tags:
+        - auth-controller
+      summary: authenticateUser
+      operationId: authenticateUserUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: loginRequest
+          description: loginRequest
+          required: true
+          schema:
+            $ref: '#/definitions/LoginRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /api/auth/signup:
+    post:
+      tags:
+        - auth-controller
+      summary: registerUser
+      operationId: registerUserUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: signUpRequest
+          description: signUpRequest
+          required: true
+          schema:
+            $ref: '#/definitions/SignUpRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /api/user/check-email-availability:
+    get:
+      tags:
+        - user-controller
+      summary: checkEmailAvailability
+      operationId: checkEmailAvailabilityUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: email
+          in: query
+          description: email
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/UserIdentityAvailability'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /api/user/check-username-availability:
+    get:
+      tags:
+        - user-controller
+      summary: checkUsernameAvailability
+      operationId: checkUsernameAvailabilityUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: username
+          in: query
+          description: username
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/UserIdentityAvailability'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /api/user/me:
+    get:
+      tags:
+        - user-controller
+      summary: getCurrentUser
+      operationId: getCurrentUserUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: accountNonExpired
+          in: query
+          required: false
+          type: boolean
+        - name: accountNonLocked
+          in: query
+          required: false
+          type: boolean
+        - name: 'authorities[0].authority'
+          in: query
+          required: false
+          type: string
+        - name: credentialsNonExpired
+          in: query
+          required: false
+          type: boolean
+        - name: email
+          in: query
+          required: false
+          type: string
+        - name: enabled
+          in: query
+          required: false
+          type: boolean
+        - name: id
+          in: query
+          required: false
+          type: integer
+          format: int64
+        - name: name
+          in: query
+          required: false
+          type: string
+        - name: password
+          in: query
+          required: false
+          type: string
+        - name: username
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/UserSummary'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  '/api/users/{username}':
+    get:
+      tags:
+        - user-controller
+      summary: getUserProfile
+      operationId: getUserProfileUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: username
+          in: path
+          description: username
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/UserProfile'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /calendar/calendar/download:
+    get:
+      tags:
+        - calendar-controller
+      summary: downloadFullCalendar
+      operationId: downloadFullCalendarUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: format
+          in: query
+          description: format
+          required: false
+          type: string
+          default: csv
+        - name: from
+          in: query
+          description: String
+          required: false
+          type: string
+          x-example: '20180101'
+        - name: to
+          in: query
+          description: String
+          required: false
+          type: string
+          x-example: '20180211'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /calendar/spss/download:
+    get:
+      tags:
+        - calendar-controller
+      summary: downloadFullCalendar
+      operationId: downloadFullCalendarUsingGET_1
+      produces:
+        - '*/*'
+      parameters:
+        - name: format
+          in: query
+          description: format
+          required: false
+          type: string
+          default: csv
+        - name: from
+          in: query
+          description: String
+          required: false
+          type: string
+          x-example: '20180101'
+        - name: to
+          in: query
+          description: String
+          required: false
+          type: string
+          x-example: '20180211'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /dataset/latest:
+    get:
+      tags:
+        - dataset-controller
+      summary: getLatestDataset
+      operationId: getLatestDatasetUsingGET
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/DatasetCustomView'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /dataset/popular:
+    get:
+      tags:
+        - dataset-controller
+      summary: getPopularDataset
+      operationId: getPopularDatasetUsingGET
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/DatasetCustomView'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /dataset/search:
+    get:
+      tags:
+        - dataset-controller
+      summary: searchDataset
+      operationId: searchDatasetUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SearchDatasetResult'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /error:
+    get:
+      tags:
+        - basic-error-controller
+      summary: error
+      operationId: errorUsingGET
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            additionalProperties:
+              type: object
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+    head:
+      tags:
+        - basic-error-controller
+      summary: error
+      operationId: errorUsingHEAD
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            additionalProperties:
+              type: object
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - JWT:
+            - global
+      deprecated: false
+    post:
+      tags:
+        - basic-error-controller
+      summary: error
+      operationId: errorUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            additionalProperties:
+              type: object
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+    put:
+      tags:
+        - basic-error-controller
+      summary: error
+      operationId: errorUsingPUT
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            additionalProperties:
+              type: object
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+    delete:
+      tags:
+        - basic-error-controller
+      summary: error
+      operationId: errorUsingDELETE
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            additionalProperties:
+              type: object
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - JWT:
+            - global
+      deprecated: false
+    options:
+      tags:
+        - basic-error-controller
+      summary: error
+      operationId: errorUsingOPTIONS
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            additionalProperties:
+              type: object
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - JWT:
+            - global
+      deprecated: false
+    patch:
+      tags:
+        - basic-error-controller
+      summary: error
+      operationId: errorUsingPATCH
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            additionalProperties:
+              type: object
+        '204':
+          description: No Content
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/count/spss/download:
+    get:
+      tags:
+        - news-controller
+      summary: getDocumentCount
+      description: "검색어가 포함된 뉴스기사의 월별 빈도수 집계 CSV 다운로드(SPSS)"
+      operationId: getDocumentCountUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: from
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20180101'
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+        - name: to
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20180211'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/entity:
+    get:
+      tags:
+        - news-controller
+      summary: getEntityByName
+      description: 검색어가 포함된 뉴스기사의 개체명 항목 
+      operationId: getEntityByNameUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: entity
+          in: query
+          description: "\"organizationNamedEntity\", \"locationNamedEntity\", \"etcNamedEntity\", \"totalNamedEntity\""
+          required: true
+          type: string
+        - name: from
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20170101'
+        - name: page
+          in: query
+          description: "from: (page-1)*size, size: size"
+          required: true
+          type: integer
+          format: int32
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+        - name: size
+          in: query
+          description: "from: (page-1)*size, size: size"
+          required: true
+          type: integer
+          format: int32
+        - name: sort
+          in: query
+          description: "\"entity.asc\", \"entity.desc\", \"date.asc\", \"date.desc\"; default: date.desc,entity.desc"
+          required: false
+          type: array
+          items:
+            type: string
+          collectionFormat: multi
+          default: 'date.desc,entity.desc'
+        - name: to
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20190101'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/NewsNamedEntityList'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/entity/download:
+    get:
+      tags:
+        - news-controller
+      summary: downloadEntityByName
+      description: 검색어가 포함된 뉴스기사의 개체명 항목 다운로드 
+      operationId: downloadEntityByNameUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: entity
+          in: query
+          description: "\"organizationNamedEntity\", \"locationNamedEntity\", \"etcNamedEntity\", \"totalNamedEntity\""
+          required: true
+          type: string
+        - name: format
+          in: query
+          description: json, csv, xlsx format download
+          required: false
+          type: string
+          default: csv
+        - name: from
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20170101'
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+        - name: sort
+          in: query
+          description: "\"entity.asc\", \"entity.desc\", \"date.asc\", \"date.desc\"; default: date.desc,entity.desc"
+          required: false
+          type: array
+          items:
+            type: string
+          collectionFormat: multi
+          default: 'date.desc,entity.desc'
+        - name: to
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20190101'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/entity/spss/download:
+    get:
+      tags:
+        - news-controller
+      summary: downloadEntitySPSS
+      description: 검색어가 포함된 뉴스기사의 개체명 항목 CSV 다운로드(SPSS)
+      operationId: downloadEntitySPSSUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: from
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20180101'
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+        - name: size
+          in: query
+          description: size
+          required: false
+          type: integer
+          default: 1000
+          format: int32
+        - name: to
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20180211'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/entity/summary:
+    get:
+      tags:
+        - news-controller
+      summary: getEntitySummary
+      description: 검색어가 포함된 뉴스기사의 전체 개체명 항목 및 건수  
+      operationId: getEntitySummaryUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: from
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20170101'
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+        - name: size
+          in: query
+          description: size
+          required: false
+          type: integer
+          default: 100
+          format: int32
+        - name: to
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20190101'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/NewsNamedEntitySummaryList'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/related:
+    get:
+      tags:
+        - news-controller
+      summary: getRelatedTopic
+      description: 검색어를 포함하는 전체 뉴스기사에서 입력한 키워드와 가장 연관성이 높은 관련 키워드
+      operationId: getRelatedTopicUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: from
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20180101'
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+        - name: size
+          in: query
+          description: size
+          required: false
+          type: integer
+          default: 100
+          format: int32
+        - name: to
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20180211'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Map«string,string»'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/related/download:
+    get:
+      tags:
+        - news-controller
+      summary: downloadRelatedTopic
+      description: 검색어를 포함하는 전체 뉴스기사에서 입력한 키워드와 연관성이 높은 관련 키워드
+      operationId: downloadRelatedTopicUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: bsize
+          in: query
+          description: 각 날짜별 가장 연관성이 높은 상위 개수
+          required: false
+          type: integer
+          default: 10
+          format: int32
+        - name: from
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20170101'
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+        - name: size
+          in: query
+          description: 특정 하루 기준 가장 연관성이 높은 관련 키워드
+          required: false
+          type: integer
+          default: 10000
+          format: int32
+        - name: to
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20181231'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/related/rank/download:
+    get:
+      tags:
+        - news-controller
+      summary: downloadRelatedRank
+      operationId: downloadRelatedRankUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: bsize
+          in: query
+          description: bsize
+          required: false
+          type: integer
+          default: 10
+          format: int32
+        - name: format
+          in: query
+          description: format
+          required: false
+          type: string
+          default: csv
+        - name: from
+          in: query
+          description: String
+          required: false
+          type: string
+          x-example: '20180101'
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+        - name: size
+          in: query
+          description: size
+          required: false
+          type: integer
+          default: 10000
+          format: int32
+        - name: to
+          in: query
+          description: String
+          required: false
+          type: string
+          x-example: '20180211'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/related/spss/download:
+    get:
+      tags:
+        - news-controller
+      summary: downloadRelatedTopicSPSS
+      operationId: downloadRelatedTopicSPSSUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: from
+          in: query
+          description: String
+          required: false
+          type: string
+          x-example: '20180101'
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+        - name: size
+          in: query
+          description: size
+          required: false
+          type: integer
+          default: 100
+          format: int32
+        - name: to
+          in: query
+          description: String
+          required: false
+          type: string
+          x-example: '20180211'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/timeline:
+    get:
+      tags:
+        - news-controller
+      summary: getTimeLineChart
+      operationId: getTimeLineChartUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TimeLineChart'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/timeline/download:
+    get:
+      tags:
+        - news-controller
+      summary: downloadTimeLineChart
+      operationId: downloadTimeLineChartUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/timeline/summary:
+    get:
+      tags:
+        - news-controller
+      summary: getTimelineSummary
+      operationId: getTimelineSummaryUsingGET
+      produces:
+        - application/json
+      parameters:
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              type: number
+              format: double
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/topic:
+    get:
+      tags:
+        - news-controller
+      summary: getTopic
+      operationId: getTopicUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: from
+          in: query
+          description: String
+          required: false
+          type: string
+          x-example: '20180101'
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+        - name: size
+          in: query
+          description: size
+          required: false
+          type: integer
+          default: 100
+          format: int32
+        - name: to
+          in: query
+          description: String
+          required: false
+          type: string
+          x-example: '20180211'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Map«string,string»'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/topic/download:
+    get:
+      tags:
+        - news-controller
+      summary: downloadTopic
+      operationId: downloadTopicUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: bsize
+          in: query
+          description: bsize
+          required: false
+          type: integer
+          default: 10
+          format: int32
+        - name: from
+          in: query
+          description: String
+          required: false
+          type: string
+          x-example: '20180101'
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+        - name: size
+          in: query
+          description: size
+          required: false
+          type: integer
+          default: 10000
+          format: int32
+        - name: to
+          in: query
+          description: String
+          required: false
+          type: string
+          x-example: '20180211'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/topic/rank/download:
+    get:
+      tags:
+        - news-controller
+      summary: downloadTopicRank
+      operationId: downloadTopicRankUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: bsize
+          in: query
+          description: bsize
+          required: false
+          type: integer
+          default: 10
+          format: int32
+        - name: from
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20180101'
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+        - name: size
+          in: query
+          description: size
+          required: false
+          type: integer
+          default: 10000
+          format: int32
+        - name: to
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20180211'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /news/topic/spss/download:
+    get:
+      tags:
+        - news-controller
+      summary: downloadTopicSPSS
+      description: 검색어를 포함하는 전체 뉴스기사에서 가장 중요한 주제어 목록 CSV 다운로드(SPSS)
+      operationId: downloadTopicSPSSUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: from
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20170101'
+        - name: query
+          in: query
+          description: query
+          required: true
+          type: string
+        - name: size
+          in: query
+          description: size
+          required: false
+          type: integer
+          default: 1000
+          format: int32
+        - name: to
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20181231'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /weather/download:
+    get:
+      tags:
+        - weather-controller
+      summary: downloadMultipleWeather
+      description: 날씨 데이터셋 다운로드; dataset 정보는 192.168.210.142 dataset_info 참고
+      operationId: downloadMultipleWeatherUsingGET
+      produces:
+        - application/json
+      parameters:
+        - name: dataset
+          in: query
+          description: w-avg-ta, w-max-ta, w-min-ta, w-prob-rn, w-sum-rn, w-dd-mefs, w-max-wd, w-avg-ws, w-avg-rhm, w-avg-tca, a-pm10, a-pm25, a-o3, s-01-swind, s-02-hrain, s-03-cold, s-04-dry, s-05-ssurge, s-06-hsea, s-07-typoon, s-08-hsnow, s-09-ydust, s-10-resv
+          required: true
+          type: array
+          items:
+            type: string
+          collectionFormat: multi
+        - name: format
+          in: query
+          description: format
+          required: false
+          type: string
+          default: csv
+        - name: from
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20170101'
+        - name: to
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20191231'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  /weather/spss/download:
+    get:
+      tags:
+        - weather-controller
+      summary: downloadFullWeatherSPSS
+      description: 날씨 데이터셋 CSV 다운로드(SPSS); dataset 정보는 192.168.210.142 dataset_info 참고
+      operationId: downloadFullWeatherSPSSUsingGET
+      produces:
+        - '*/*'
+      parameters:
+        - name: areacode
+          in: query
+          description: areacode; dd >= 10 && dd <= 90; 192.168.210.142 weather_area_info 참고
+          required: false
+          type: array
+          items:
+            type: integer
+            format: int32
+          collectionFormat: multi
+        - name: from
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20170101'
+        - name: to
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20181231'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+  '/weather/{dataset}/download':
+    get:
+      tags:
+        - weather-controller
+      summary: downloadWeather
+      description: 날씨 데이터셋 다운로드; dataset 정보는 192.168.210.142 dataset_info 참고
+      operationId: downloadWeatherUsingGET
+      produces:
+        - application/json
+      parameters:
+        - name: areacode
+          in: query
+          description: areacode; dd >= 10 && dd <= 90; 192.168.210.142 weather_area_info 참고
+          required: false
+          type: array
+          items:
+            type: integer
+            format: int32
+          collectionFormat: multi
+        - name: dataset
+          in: path
+          description: w-avg-ta, w-max-ta, w-min-ta, w-prob-rn, w-sum-rn, w-dd-mefs, w-max-wd, w-avg-ws, w-avg-rhm, w-avg-tca, a-pm10, a-pm25, a-o3, s-01-swind, s-02-hrain, s-03-cold, s-04-dry, s-05-ssurge, s-06-hsea, s-07-typoon, s-08-hsnow, s-09-ydust, s-10-resv
+          required: true
+          type: string
+        - name: format
+          in: query
+          description: format
+          required: false
+          type: string
+          default: csv
+        - name: from
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20170101'
+        - name: to
+          in: query
+          description: \"yyyyMMdd\" format String
+          required: false
+          type: string
+          x-example: '20181231'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - JWT:
+            - global
+      deprecated: false
+securityDefinitions:
+  JWT:
+    type: apiKey
+    name: Authorization
+    in: header
+definitions:
+  DatasetCustomView:
+    type: object
+    properties:
+      category_code:
+        type: string
+      download_link:
+        type: string
+      ds_code:
+        type: string
+      ds_desc:
+        type: string
+      ds_end_date:
+        type: string
+      ds_format:
+        type: string
+      ds_keywords:
+        type: array
+        items:
+          type: string
+      ds_name:
+        type: string
+      ds_period:
+        type: string
+      ds_size:
+        type: integer
+        format: int32
+      ds_source:
+        type: string
+      ds_start_date:
+        type: string
+      ds_ver_major:
+        type: string
+      update_date:
+        type: string
+    title: DatasetCustomView
+  LoginRequest:
+    type: object
+    properties:
+      password:
+        type: string
+      username_or_email:
+        type: string
+    title: LoginRequest
+  'Map«string,string»':
+    type: object
+    title: 'Map«string,string»'
+    additionalProperties:
+      type: string
+  ModelAndView:
+    type: object
+    properties:
+      empty:
+        type: boolean
+      model:
+        type: object
+      model_map:
+        type: object
+        additionalProperties:
+          type: object
+      reference:
+        type: boolean
+      status:
+        type: string
+        enum:
+          - '100'
+          - '101'
+          - '102'
+          - '103'
+          - '200'
+          - '201'
+          - '202'
+          - '203'
+          - '204'
+          - '205'
+          - '206'
+          - '207'
+          - '208'
+          - '226'
+          - '300'
+          - '301'
+          - '302'
+          - '303'
+          - '304'
+          - '305'
+          - '307'
+          - '308'
+          - '400'
+          - '401'
+          - '402'
+          - '403'
+          - '404'
+          - '405'
+          - '406'
+          - '407'
+          - '408'
+          - '409'
+          - '410'
+          - '411'
+          - '412'
+          - '413'
+          - '414'
+          - '415'
+          - '416'
+          - '417'
+          - '418'
+          - '419'
+          - '420'
+          - '421'
+          - '422'
+          - '423'
+          - '424'
+          - '426'
+          - '428'
+          - '429'
+          - '431'
+          - '451'
+          - '500'
+          - '501'
+          - '502'
+          - '503'
+          - '504'
+          - '505'
+          - '506'
+          - '507'
+          - '508'
+          - '509'
+          - '510'
+          - '511'
+      view:
+        $ref: '#/definitions/View'
+      view_name:
+        type: string
+    title: ModelAndView
+  NewsNamedEntity:
+    type: object
+    properties:
+      link:
+        type: string
+      named_entity_list:
+        type: array
+        items:
+          type: string
+      title:
+        type: string
+      written_time:
+        type: string
+    title: NewsNamedEntity
+  NewsNamedEntityList:
+    type: object
+    properties:
+      news_named_entity_list:
+        type: array
+        items:
+          $ref: '#/definitions/NewsNamedEntity'
+      total_hits:
+        type: integer
+        format: int64
+    title: NewsNamedEntityList
+  NewsNamedEntitySummary:
+    type: object
+    properties:
+      doc_count:
+        type: integer
+        format: int64
+      key_word:
+        type: string
+    title: NewsNamedEntitySummary
+  NewsNamedEntitySummaryList:
+    type: object
+    properties:
+      entity_name:
+        type: string
+      news_named_entity_summary_list:
+        type: array
+        items:
+          $ref: '#/definitions/NewsNamedEntitySummary'
+      num_total_terms:
+        type: integer
+        format: int64
+    title: NewsNamedEntitySummaryList
+  SearchDatasetResult:
+    type: object
+    properties:
+      dataset_custom_view_list:
+        type: array
+        items:
+          $ref: '#/definitions/DatasetCustomView'
+      download_urllist:
+        type: array
+        items:
+          type: string
+    title: SearchDatasetResult
+  SignUpRequest:
+    type: object
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    title: SignUpRequest
+  TimeLineChart:
+    type: object
+    properties:
+      date:
+        type: string
+      event:
+        type: string
+      value:
+        type: number
+        format: double
+    title: TimeLineChart
+  Timestamp:
+    type: object
+    properties:
+      date:
+        type: integer
+        format: int32
+      day:
+        type: integer
+        format: int32
+      hours:
+        type: integer
+        format: int32
+      minutes:
+        type: integer
+        format: int32
+      month:
+        type: integer
+        format: int32
+      nanos:
+        type: integer
+        format: int32
+      seconds:
+        type: integer
+        format: int32
+      time:
+        type: integer
+        format: int64
+      timezone_offset:
+        type: integer
+        format: int32
+      year:
+        type: integer
+        format: int32
+    title: Timestamp
+  UserIdentityAvailability:
+    type: object
+    properties:
+      available:
+        type: boolean
+    title: UserIdentityAvailability
+  UserProfile:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      joined_at:
+        $ref: '#/definitions/Timestamp'
+      name:
+        type: string
+      username:
+        type: string
+    title: UserProfile
+  UserSummary:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      username:
+        type: string
+    title: UserSummary
+  View:
+    type: object
+    properties:
+      content_type:
+        type: string
+    title: View

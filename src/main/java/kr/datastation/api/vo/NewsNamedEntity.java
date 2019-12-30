@@ -18,7 +18,7 @@ public class NewsNamedEntity {
     @SerializedName("written_time")
     private String writtenTime;
 
-    @SerializedName(value = "organizationNamedEntity", alternate = {"locationNamedEntity", "personNamedEntity", "etcNamedEntity", "totalNamedEntity"})
+    @SerializedName(value = "organizationNamedEntity", alternate = {"locationNamedEntity", "etcNamedEntity", "totalNamedEntity"})
     private List<String> namedEntityList;
 
     public String getWrittenTime() {

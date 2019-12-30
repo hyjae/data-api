@@ -17,7 +17,7 @@ public class WeatherDaily_ {
     public static volatile SingularAttribute<WeatherDaily, String> wDate;
     public static volatile SingularAttribute<WeatherDaily, WeatherArea> areaCode;
     public static volatile SingularAttribute<WeatherDaily, Integer> actualYn;
-    public static volatile SingularAttribute<WeatherDaily, String> WDescription;
+    public static volatile SingularAttribute<WeatherDaily, String> wDescription;
     public static volatile SingularAttribute<WeatherDaily, BigDecimal> wAvgTa;
     public static volatile SingularAttribute<WeatherDaily, BigDecimal> wMaxTa;
     public static volatile SingularAttribute<WeatherDaily, BigDecimal> wMinTa;
@@ -39,7 +39,7 @@ public class WeatherDaily_ {
     public static volatile SingularAttribute<WeatherDaily, Integer> s06Hsea;
     public static volatile SingularAttribute<WeatherDaily, Integer> s07Typoon;
     public static volatile SingularAttribute<WeatherDaily, Integer> s08Hsnow;
-    public static volatile SingularAttribute<WeatherDaily, Integer> s09YDust;
+    public static volatile SingularAttribute<WeatherDaily, Integer> s09Ydust;
     public static volatile SingularAttribute<WeatherDaily, Integer> s10Resv;
     public static volatile SingularAttribute<WeatherDaily, Integer> s11Resv;
     public static volatile SingularAttribute<WeatherDaily, Integer> s12Hheat;
