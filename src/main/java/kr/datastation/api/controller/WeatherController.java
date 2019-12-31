@@ -53,11 +53,11 @@ public class WeatherController {
         httpResponseCsvWriter.close();
     }
 
-    @RequestMapping(value = "/{dataset}/download", method = RequestMethod.GET, produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
+    @RequestMapping(value = "/{dataset}/download", method = RequestMethod.GET, produces = "application/json")
     public void downloadWeather(HttpServletResponse response,
                                 @PathVariable String dataset,
                                 @RequestParam(required = false, defaultValue = "csv") String format,
@@ -76,11 +76,11 @@ public class WeatherController {
         httpResponseCsvWriter.close();
     }
 
-    @RequestMapping(value = "/spss/download", method = RequestMethod.GET)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
             @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
     })
+    @RequestMapping(value = "/spss/download", method = RequestMethod.GET)
     public void downloadFullWeatherSPSS(HttpServletResponse response,
                                         @DateRequestParam(point = TimePoint.FROM) String from,
                                         @DateRequestParam(point = TimePoint.TO) String to,
@@ -89,7 +89,6 @@ public class WeatherController {
 
         List<String> columnNames = ReflectionUtils.getColumnNames(WeatherDaily.class);
         columnNames.remove(0); // delete idx
-        columnNames.add(1, "area_code");
         columnNames.add(2, "main_name");
         columnNames.add(3, "sub_name");
         columnNames.add(4, "city_name");

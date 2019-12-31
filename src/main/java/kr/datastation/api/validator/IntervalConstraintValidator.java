@@ -8,11 +8,8 @@ import java.lang.reflect.Field;
 
 public class IntervalConstraintValidator implements ConstraintValidator<ValidInterval, String> {
 
-    private String interval;
-
     @Override
     public void initialize(ValidInterval validInterval) {
-        this.interval = validInterval.value();
     }
 
     @Override

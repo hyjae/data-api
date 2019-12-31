@@ -28,7 +28,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @ControllerAdvice(assignableTypes = {NewsController.class, WeatherController.class, DateHandlerResolver.class, WeatherDailyRepositoryImpl.class})
 public class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 
-    @Override
+    @Override // An exception for a missing parameter
     protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         ApiError apiError = new ApiError(BAD_REQUEST);
         String message = ex.getMessage();

@@ -33,7 +33,7 @@ public class NewsController {
 
     final ElasticSearchService elasticSearchService;
     final List<String> entityNames = Arrays.asList(
-            "locationNamedEntity", "organizationNamedEntity", "personNamedEntity", "etcNamedEntity", "totalNamedEntity");
+            "locationNamedEntity", "organizationNamedEntity", "etcNamedEntity", "totalNamedEntity");
 
     @Autowired
     public NewsController(ElasticSearchService elasticSearchService) {

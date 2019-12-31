@@ -11,11 +11,8 @@ public class EntityNameConstraintValidator implements ConstraintValidator<ValidE
 
     final List<String> namedEntityList = Arrays.asList("organizationNamedEntity", "locationNamedEntity", "etcNamedEntity", "totalNamedEntity");
 
-    private String entityName;
-
     @Override
     public void initialize(ValidEntityName validEntityName) {
-        this.entityName = validEntityName.value();
     }
 
     @Override

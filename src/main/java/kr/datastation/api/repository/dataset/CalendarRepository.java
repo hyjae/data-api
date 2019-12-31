@@ -23,7 +23,7 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long> {
             @QueryHint(name = READ_ONLY, value = "true")
     })
     @Query(value = "SELECT * FROM calendar WHERE sol_ymd between ?1 and ?2", nativeQuery = true)
-    Stream<Calendar> findBySolYmdBetweenStream(String from, String to);
+    Stream<CalendarCustomView> findBySolYmdBetweenOrderBySolYmdUsingStream(String from, String to);
 
     <T> List<T> findBySolYmdBetweenOrderBySolYmd(String from, String to, Class<T> type);
 

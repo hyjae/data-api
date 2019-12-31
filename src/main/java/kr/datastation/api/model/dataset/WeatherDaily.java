@@ -117,31 +117,35 @@ public class WeatherDaily implements Serializable {
     private Timestamp updateDdtt;
 
     public String toCSV() {
-        StringBuilder text = new StringBuilder();
-        Field[] declaredFields = WeatherDaily.class.getDeclaredFields();
-
-        for (int i = 1; i < declaredFields.length; ++i) { // skip index
-            try {
-                Object o = declaredFields[i].get(this);
-                if (o == null) {
-                    text.append("NULL");
-                } else if (o instanceof Date) {
-                    Format formatter = new SimpleDateFormat("yyyyMMdd");
-                    String dateFormatString = formatter.format(o);
-                    text.append(dateFormatString);
-                } else if (o instanceof WeatherArea) {
-                    text.append(((WeatherArea) o).toCSV());
-                } else {
-                    text.append(o.toString());
-                }
-                if (i != declaredFields.length - 1) {
-                    text.append(", ");
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace(); // TODO: program exception
-            }
-        }
-        return text.toString();
+        return this.wDate + ", " + this.areaCode.getAreaCode() + ", " + this.areaCode.getMainName() + ", " + this.areaCode.getSubName() + ", " + this.areaCode.getCityName() + ", " + this.actualYn + ", " + this.wDescription + ", " + this.wAvgTa + ", " + this.wMaxTa + ", " + this.wMinTa + ", " + this.wProbRn + ", " + this.wSumRn + ", " + this.wDdMefs + ", " + this.wMaxWd + ", " + this.wAvgWs + ", " + this.wAvgRhm + ", " + this.wAvgTca + ", " + this.aPm10 + ", " + this.aPm25 + ", " + this.aO3 + ", " + this.s01Swind + ", " + this.s02Hrain + ", " + this.s03Cold + ", " + this.s04Dry + ", " + this.s05Ssurge + ", " + this.s06Hsea + ", " + this.s07Typoon + ", " + this.s08Hsnow + ", " + this.s09Ydust + ", " + this.s10Resv + ", " + this.s11Resv + ", " + this.s12Hheat;
     }
+
+//    public String toCSV() {
+//        StringBuilder text = new StringBuilder();
+//        Field[] declaredFields = WeatherDaily.class.getDeclaredFields();
+//
+//        for (int i = 1; i < declaredFields.length; ++i) { // skip index
+//            try {
+//                Object o = declaredFields[i].get(this);
+//                if (o == null) {
+//                    text.append("NULL");
+//                } else if (o instanceof Date) {
+//                    Format formatter = new SimpleDateFormat("yyyyMMdd");
+//                    String dateFormatString = formatter.format(o);
+//                    text.append(dateFormatString);
+//                } else if (o instanceof WeatherArea) {
+//                    text.append(((WeatherArea) o).toCSV());
+//                } else {
+//                    text.append(o.toString());
+//                }
+//                if (i != declaredFields.length - 1) {
+//                    text.append(", ");
+//                }
+//            } catch (IllegalAccessException e) {
+//                e.printStackTrace(); // TODO: program exception
+//            }
+//        }
+//        return text.toString();
+//    }
 }
 

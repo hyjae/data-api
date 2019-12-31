@@ -12,7 +12,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidInterval {
     String value() default "1w";
-    String message() default "Invalid Interval Value";
-    Class<?>[] groups() default {}; // empty collection
-    Class<? extends Payload>[] payload() default {}; //?
 }
