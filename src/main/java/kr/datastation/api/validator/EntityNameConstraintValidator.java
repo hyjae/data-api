@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class EntityNameConstraintValidator implements ConstraintValidator<ValidEntityName, String> {
 
-    final List<String> namedEntityList = Arrays.asList("organizationNamedEntity", "locationNamedEntity", "etcNamedEntity", "totalNamedEntity");
+    final List<String> namedEntityList = Arrays.asList("organizationNamedEntity", "locationNamedEntity", "etcNamedEntity", "totalNamedEntity", "personNamedEntity");
 
     @Override
     public void initialize(ValidEntityName validEntityName) {

@@ -102,8 +102,7 @@ public class ElasticSearchService {
         return result;
     }
 
-    public List<Map<String, String>> getDailyRank(String query, String field, String from, String to, int size,
-                                                  int bsize, Histogram.Order histogramOrder) {
+    public List<Map<String, String>> getDailyRank(String query, String field, String from, String to, int size, Histogram.Order histogramOrder) {
         DateHistogramInterval dateHistogramInterval = new DateHistogramInterval("1d");
         DateHistogramBuilder dateHistogramBuilder = AggregationBuilders
                 .dateHistogram("date_hist")
@@ -135,7 +134,7 @@ public class ElasticSearchService {
         for (Histogram.Bucket bucket : histogram.getBuckets()) {
             String date = bucket.getKeyAsString();
             Terms terms = bucket.getAggregations().get("agg");
-            long min = Math.min(terms.getBuckets().size(), bsize);
+            long min = Math.min(terms.getBuckets().size(), size);
             List<Terms.Bucket> buckets = terms.getBuckets();
             for (int i = 0; i < min; ++i) {
                 Map<String, String> entity = new LinkedHashMap<>();
@@ -393,7 +392,7 @@ public class ElasticSearchService {
     }
 
     private List<TimeLineChart> makeTimeLineChart(Histogram agg) throws ParseException {
-        SimpleDateFormat toDateFormat = new SimpleDateFormat("yyyy.MM.dd");
+//        SimpleDateFormat toDateFormat = new SimpleDateFormat("yyyy.MM.dd");
         SimpleDateFormat fromDateFormat = new SimpleDateFormat("yyyyMMdd");
 
         final List<TimeLineChart> result = new ArrayList<>();
@@ -401,7 +400,8 @@ public class ElasticSearchService {
             Terms terms = entry.getAggregations().get("agg");
             if (terms.getBuckets().size() > 0) {
                 String action = terms.getBuckets().get(0).getKeyAsString();
-                result.add(new TimeLineChart(toDateFormat.format(fromDateFormat.parse(entry.getKeyAsString())), entry.getDocCount(), action));
+                result.add(new TimeLineChart(entry.getKeyAsString(), entry.getDocCount(), action));
+//                result.add(new TimeLineChart(toDateFormat.format(fromDateFormat.parse(entry.getKeyAsString())), entry.getDocCount(), action));
             }
         }
         return result;

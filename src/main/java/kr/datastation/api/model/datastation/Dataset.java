@@ -1,17 +1,21 @@
 package kr.datastation.api.model.datastation;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Data
 @Entity
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "dataset_info", schema = "datastation_a")
-public class Dataset {
+public class Dataset implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

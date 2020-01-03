@@ -9,7 +9,6 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.transaction.Transactional;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -17,7 +16,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/dataset")
 @Api("/dataset")
-@Transactional // TODO: ?
+//@Transactional // TODO: ?
 public class DatasetController {
 
     final DatasetRepository datasetRepository;
@@ -37,6 +36,13 @@ public class DatasetController {
     @RequestMapping(value = "/popular", method = RequestMethod.GET)
     public List<DatasetCustomView> getPopularDataset() {
         return datasetRepository.findTop10ByOrderByDownloadCountDesc();
+    }
+
+    @RequestMapping(value = "/search/dataset", method = RequestMethod.GET)
+    public SearchDatasetResult retrieveDatasetByCode(@RequestParam String ctgrCode, @RequestParam List<String> dsCodeList) {
+        List<DatasetCustomView> allByCategoryCtgrIdAndDsCodeList = datasetRepository.findAllByCategoryCtgrIdAndDsCodeList(ctgrCode, dsCodeList);
+        return null;
+
     }
 
     @RequestMapping(value = "/search", method = RequestMethod.GET)

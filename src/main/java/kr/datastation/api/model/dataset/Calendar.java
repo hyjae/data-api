@@ -120,7 +120,7 @@ public class Calendar {
                     stringBuilder.append(o.toString());
                 }
                 if (i != declaredFields.length - 1) {
-                    stringBuilder.append(", ");
+                    stringBuilder.append(",");
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace(); // TODO: program exception

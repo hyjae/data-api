@@ -34,6 +34,6 @@ public class NewsNamedEntity {
         try {
             writtenTime = this.writtenTime.substring(0, 8);
         } catch(IndexOutOfBoundsException e) {}
-        return titleWithNoComma + ", " + String.join(" ", this.namedEntityList) + ", " + writtenTime;
+        return titleWithNoComma + "," + String.join(" ", this.namedEntityList) + "," + writtenTime;
     }
 }

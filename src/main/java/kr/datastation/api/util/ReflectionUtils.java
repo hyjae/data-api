@@ -51,7 +51,7 @@ public class ReflectionUtils {
                 } else {
                     stringBuilder.append(objectToCSVFormatHelper(o));
                 } if (i != fields.length - 1) {
-                    stringBuilder.append(", ");
+                    stringBuilder.append(",");
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();

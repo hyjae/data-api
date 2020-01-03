@@ -33,6 +33,6 @@ public interface CalendarCustomView {
     Integer getIsHolidayCn();
     String getDateNameCn();
 
-    @Value("#{target.solYmd + ', ' + target.solYear + ', ' + target.solMonth + ', ' + target.solDay + ', ' + target.solNday + ', ' + target.solLeapyear + ', ' + target.solWeek + ', ' + target.lunYear + ', ' + target.lunMonth + ', ' + target.lunDay + ', ' + target.lunNday + ', ' + target.lunLeapmonth + ', ' + target.lunSecha + ', ' + target.lunWolgeon + ', ' + target.lunIljin + ', ' + target.dateKind + ', ' + target.isSpecial + ', ' + target.isHoliday + ', ' + target.dateName + ', ' + target.isSpecialUs + ', ' + target.isHolidayUs + ', ' + target.dateMameUs + ', ' + target.isSpecialJp + ', ' + target.isHolidayJp + ', ' + target.dateNameJp + ', ' + target.isSpecialCn + ', ' + target.isHolidayCn + ', ' + target.dateNameCn}")
+    @Value("#{target.solYmd + ',' + target.solYear + ',' + target.solMonth + ',' + target.solDay + ',' + target.solNday + ',' + target.solLeapyear + ',' + target.solWeek + ',' + target.lunYear + ',' + target.lunMonth + ',' + target.lunDay + ',' + target.lunNday + ',' + target.lunLeapmonth + ',' + target.lunSecha + ',' + target.lunWolgeon + ',' + target.lunIljin + ',' + target.dateKind + ',' + target.isSpecial + ',' + target.isHoliday + ',' + target.dateName + ',' + target.isSpecialUs + ',' + target.isHolidayUs + ',' + target.dateMameUs + ',' + target.isSpecialJp + ',' + target.isHolidayJp + ',' + target.dateNameJp + ',' + target.isSpecialCn + ',' + target.isHolidayCn + ',' + target.dateNameCn}")
     String toCSV();
 }

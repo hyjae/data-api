@@ -83,9 +83,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers("/news/timeline/download").authenticated()
                     .antMatchers("/news/topic/download").authenticated()
                     .antMatchers("/news/topic/rank/download").authenticated()
-                    .antMatchers("/weather/*/download").authenticated()
-                    .antMatchers("/weather/download").authenticated()
                     .antMatchers("/**").permitAll();
+//                    .antMatchers("/weather/*/download").authenticated()
+//                    .antMatchers("/weather/download").authenticated()
+//                    .antMatchers("/**", "/weather/spss/download").permitAll();
 //                    .antMatchers("/v2/api-docs",
 //                            "/configuration/ui",
 //                            "/swagger-resources/**",

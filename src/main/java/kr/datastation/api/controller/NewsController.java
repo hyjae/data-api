@@ -33,7 +33,7 @@ public class NewsController {
 
     final ElasticSearchService elasticSearchService;
     final List<String> entityNames = Arrays.asList(
-            "locationNamedEntity", "organizationNamedEntity", "etcNamedEntity", "totalNamedEntity");
+            "locationNamedEntity", "organizationNamedEntity", "etcNamedEntity", "totalNamedEntity", "personNamedEntity");
 
     @Autowired
     public NewsController(ElasticSearchService elasticSearchService) {
@@ -161,8 +161,8 @@ public class NewsController {
                               @RequestParam String query,
                               @DateRequestParam(point = TimePoint.FROM) String from,
                               @DateRequestParam(point = TimePoint.TO) String to,
-                              @RequestParam(defaultValue = "10000") int size, // number of buckets
-                              @RequestParam(defaultValue = "10") int bsize) throws IOException {
+                              @RequestParam(defaultValue = "10000") int size) throws IOException {
+        final int bsize = 1;
         final DocumentOrder documentOrder = DocumentOrder.KEY_DESC;
         final Histogram.Order histogramOrder = Histogram.Order.COUNT_DESC;
 
@@ -172,7 +172,7 @@ public class NewsController {
         final List<String> headers = Arrays.asList("subject", "date");
         httpResponseCsvWriter.setHeaders(headers);
         for (Map<String, String> entry : topic)
-            httpResponseCsvWriter.write(entry.get("name") + ", " + entry.get("date"));
+            httpResponseCsvWriter.write(entry.get("name") + "," + entry.get("date"));
     }
 
     @ApiImplicitParams({
@@ -211,7 +211,7 @@ public class NewsController {
         final List<String> headers = Arrays.asList("relword", "doccnt");
         httpResponseCsvWriter.setHeaders(headers);
         for (Map<String, String> entry : relatedTopic)
-            httpResponseCsvWriter.write(entry.get("name") + ", " + entry.get("count"));
+            httpResponseCsvWriter.write(entry.get("name") + "," + entry.get("count"));
     }
 
     /*
@@ -228,8 +228,8 @@ public class NewsController {
                                      @RequestParam String query,
                                      @DateRequestParam(point = TimePoint.FROM) String from,
                                      @DateRequestParam(point = TimePoint.TO) String to,
-                                     @RequestParam(defaultValue = "10000") int size, // the number of buckets
-                                     @RequestParam(defaultValue = "10") int bsize) throws IOException { // each bucket size
+                                     @RequestParam(defaultValue = "10000") int size) throws IOException {
+        final int bsize = 1;
         final DocumentOrder documentOrder = DocumentOrder.KEY_DESC;
         final Histogram.Order histogramOrder = Histogram.Order.COUNT_DESC;
 
@@ -239,7 +239,7 @@ public class NewsController {
         final List<String> headers = Arrays.asList("name", "date");
         httpResponseCsvWriter.setHeaders(headers);
         for (Map<String, String> entry : relatedTopic)
-            httpResponseCsvWriter.write(entry.get("name") + ", " + entry.get("date"));
+            httpResponseCsvWriter.write(entry.get("name") + "," + entry.get("date"));
     }
 
     @ApiImplicitParams({
@@ -252,17 +252,16 @@ public class NewsController {
                                     @DateRequestParam(point = TimePoint.FROM) String from,
                                     @DateRequestParam(point = TimePoint.TO) String to,
                                     @RequestParam(defaultValue = "csv") String format,
-                                    @RequestParam(defaultValue = "10000") int size, // the number of buckets
-                                    @RequestParam(defaultValue = "10") int bsize) throws IOException { // each bucket size
+                                    @RequestParam(defaultValue = "10") int size) throws IOException {
         final String field = "actions";
         final Histogram.Order histogramOrder = Histogram.Order.KEY_DESC;
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("related.csv", response);
-        List<Map<String, String>> relatedTopic = elasticSearchService.getDailyRank(query, field, from, to, size, bsize, histogramOrder);
+        List<Map<String, String>> relatedTopic = elasticSearchService.getDailyRank(query, field, from, to, size, histogramOrder);
 
         final List<String> headers = Arrays.asList("name", "date", "count");
         httpResponseCsvWriter.setHeaders(headers);
         for (Map<String, String> entry : relatedTopic)
-            httpResponseCsvWriter.write(entry.get("name") + ", " + entry.get("date") + ", " + entry.get("count"));
+            httpResponseCsvWriter.write(entry.get("name") + "," + entry.get("date") + "," + entry.get("count"));
     }
 
     @ApiImplicitParams({
@@ -274,54 +273,59 @@ public class NewsController {
                                      @RequestParam String query,
                                      @DateRequestParam(point = TimePoint.FROM) String from,
                                      @DateRequestParam(point = TimePoint.TO) String to,
-                                     @RequestParam(defaultValue = "10000") int size, // the number of buckets
-                                     @RequestParam(defaultValue = "10") int bsize) throws IOException { // each bucket size
+                                     @RequestParam(defaultValue = "10000") int size) throws IOException {
         final String field = "topic";
         final Histogram.Order histogramOrder = Histogram.Order.KEY_DESC;
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("topic.csv", response);
-        List<Map<String, String>> relatedTopic = elasticSearchService.getDailyRank(query, field, from, to, size, bsize, histogramOrder);
+        List<Map<String, String>> relatedTopic = elasticSearchService.getDailyRank(query, field, from, to, size, histogramOrder);
 
         final List<String> headers = Arrays.asList("name", "date", "count");
         httpResponseCsvWriter.setHeaders(headers);
         for (Map<String, String> entry : relatedTopic)
-            httpResponseCsvWriter.write(entry.get("name") + ", " + entry.get("date") + ", " + entry.get("count"));
+            httpResponseCsvWriter.write(entry.get("name") + "," + entry.get("date") + "," + entry.get("count"));
     }
 
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
-//            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
-//    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
+    })
     @RequestMapping(value = "/timeline/summary", method = RequestMethod.GET, produces = "application/json")
-    public List<Double> getTimelineSummary(@RequestParam String query) {
-        final String from = "20170101";
-        final String to = new SimpleDateFormat("yyyyMMdd").format(DateTime.now().toDate());
+    public List<Double> getTimelineSummary(@RequestParam String query,
+                                           @DateRequestParam(point = TimePoint.FROM) String from,
+                                           @DateRequestParam(point = TimePoint.TO) String to) {
+//        final String from = "20170101";
+//        final String to = new SimpleDateFormat("yyyyMMdd").format(DateTime.now().toDate());
         return elasticSearchService.getDocFrequency(query, from, to);
     }
 
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
-//            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
-//    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
+    })
     @RequestMapping(value = "/timeline", method = RequestMethod.GET)
-    public List<TimeLineChart> getTimeLineChart(@RequestParam String query) throws ParseException {
+    public List<TimeLineChart> getTimeLineChart(@RequestParam String query,
+                                                @DateRequestParam(point = TimePoint.FROM) String from,
+                                                @DateRequestParam(point = TimePoint.TO) String to) throws ParseException {
         final String interval = "1d";
-        final String from = "20170101";
-        final String to = new SimpleDateFormat("yyyyMMdd").format(DateTime.now().toDate());
+//        final String from = "20170101";
+//        final String to = new SimpleDateFormat("yyyyMMdd").format(DateTime.now().toDate());
         return elasticSearchService.getTimeLine(query, from, to, interval);
     }
 
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
-//            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
-//    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "from", value = "String", dataType = "String", paramType = "query", example = "20180101"),
+            @ApiImplicitParam(name = "to", value = "String", dataType = "String", paramType = "query", example = "20180211"),
+    })
     @RequestMapping(value = "/timeline/download", method = RequestMethod.GET)
     public void downloadTimeLineChart(HttpServletResponse response,
-                                      @RequestParam String query) throws ParseException, IOException {
+                                      @RequestParam String query,
+                                      @DateRequestParam(point = TimePoint.FROM) String from,
+                                      @DateRequestParam(point = TimePoint.TO) String to) throws ParseException, IOException {
         HttpResponseCSVWriter httpResponseCsvWriter = new HttpResponseCSVWriter("timechart.csv", response);
 
         final String interval = "1d";
-        final String from = "20170101";
-        final String to = new SimpleDateFormat("yyyyMMdd").format(DateTime.now().toDate());
+//        final String from = "20170101";
+//        final String to = new SimpleDateFormat("yyyyMMdd").format(DateTime.now().toDate());
         List<TimeLineChart> timeLineList = elasticSearchService.getTimeLine(query, from, to, interval);
 
         final List<String> headers = Arrays.asList("date", "event", "value");
@@ -345,7 +349,7 @@ public class NewsController {
         final List<String> headers = Arrays.asList("yyyymm", "doccnt");
         httpResponseCsvWriter.setHeaders(headers);
         for (Map<String, String> entry : documentCount)
-            httpResponseCsvWriter.write(entry.get("yyyymm") + ", " + entry.get("doccnt"));
+            httpResponseCsvWriter.write(entry.get("yyyymm") + "," + entry.get("doccnt"));
         httpResponseCsvWriter.close();
     }
 }

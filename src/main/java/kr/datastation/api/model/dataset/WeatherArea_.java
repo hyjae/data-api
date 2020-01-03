@@ -37,7 +37,7 @@ public class WeatherArea_ {
                 Object o = declaredFields[i].get(this);
                 stringBuilder.append(o.toString());
                 if (i != declaredFields.length - 1) {
-                    stringBuilder.append(", ");
+                    stringBuilder.append(",");
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace(); // TODO: program exception

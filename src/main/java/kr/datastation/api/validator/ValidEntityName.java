@@ -13,4 +13,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidEntityName {
     String value() default "etcNamedEntity";
+    String message() default "Invalid Entity Name";
+    Class<?>[] groups() default {}; // empty collection
+    Class<? extends Payload>[] payload() default {}; //?
 }

@@ -9,7 +9,7 @@ import java.util.List;
 
 
 @Repository
-public interface DatasetRepository extends JpaRepository<Dataset, Long> {
+public interface DatasetRepository extends JpaRepository<Dataset, Long>, DatasetRepositoryCustom {
     // TODO: full text search
     List<DatasetCustomView> findByDsDescContainingOrDsKeywordContaining(String desc, String keyword);
 

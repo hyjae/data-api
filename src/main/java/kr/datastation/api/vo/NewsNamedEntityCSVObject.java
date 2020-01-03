@@ -15,6 +15,6 @@ public class NewsNamedEntityCSVObject {
     @NonNull Long docCount;
 
     public String toCSV() {
-        return keyWord + ", " + namedEntity + ", " + docCount.toString();
+        return keyWord + "," + namedEntity.replace("NamedEntity", "") + "," + docCount.toString();
     }
 }

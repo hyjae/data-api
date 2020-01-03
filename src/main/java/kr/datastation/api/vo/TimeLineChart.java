@@ -17,6 +17,6 @@ public class TimeLineChart implements Serializable {
     private String event;
 
     public String toCSV() {
-        return this.date + ", " + this.event + ", "+ this.value;
+        return this.date + "," + this.event + ","+ this.value;
     }
 }

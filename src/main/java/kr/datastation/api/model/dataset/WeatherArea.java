@@ -65,6 +65,6 @@ public class WeatherArea implements Serializable {
     private Timestamp updateDdTt;
 
     public String toCSV() {
-        return this.getAreaCode() + ", " + this.getMainName() + ", " + this.getSubName() + ", " + this.getCityName();
+        return this.getAreaCode() + "," + this.getMainName() + "," + this.getSubName() + "," + this.getCityName();
     }
 }

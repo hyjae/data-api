@@ -47,7 +47,7 @@ public class CommonUtils {
                 row.append("NULL");
             }
             if (i != length - 1)
-                row.append(", ");
+                row.append(",");
         }
         return row.toString();
     }
@@ -64,7 +64,7 @@ public class CommonUtils {
                 row.append("NULL");
             }
             if (i != length - 1)
-                row.append(", ");
+                row.append(",");
         }
         return row.toString();
     }
