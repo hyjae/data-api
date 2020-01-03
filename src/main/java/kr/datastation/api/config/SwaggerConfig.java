@@ -25,6 +25,7 @@ public class SwaggerConfig {
                 .paths(PathSelectors.any())
                 .build()
                 .apiInfo(apiInfo())
+//                .enableUrlTemplating(true) // same mapping & diff params
                 .securitySchemes(Lists.newArrayList(apiKey()))
                 .securityContexts(Lists.newArrayList(securityContext()));
     }
