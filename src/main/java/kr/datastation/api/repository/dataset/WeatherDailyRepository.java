@@ -1,7 +1,7 @@
 package kr.datastation.api.repository.dataset;
 
 
-import kr.datastation.api.model.dataset.WeatherDaily;
+import kr.datastation.api.entity.dataset.WeatherDaily;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;

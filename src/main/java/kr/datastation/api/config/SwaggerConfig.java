@@ -3,6 +3,7 @@ package kr.datastation.api.config;
 import com.google.common.collect.Lists;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.*;
@@ -14,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Configuration
+@EnableAspectJAutoProxy(proxyTargetClass=true)
 @EnableSwagger2
 public class SwaggerConfig {
 

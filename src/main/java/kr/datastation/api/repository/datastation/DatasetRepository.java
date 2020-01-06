@@ -1,7 +1,7 @@
 package kr.datastation.api.repository.datastation;
 
 
-import kr.datastation.api.model.datastation.Dataset;
+import kr.datastation.api.entity.datastation.Dataset;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

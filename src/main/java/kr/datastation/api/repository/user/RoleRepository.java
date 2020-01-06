@@ -1,7 +1,7 @@
 package kr.datastation.api.repository.user;
 
-import kr.datastation.api.model.user.Role;
-import kr.datastation.api.model.user.RoleName;
+import kr.datastation.api.entity.user.Role;
+import kr.datastation.api.entity.user.RoleName;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

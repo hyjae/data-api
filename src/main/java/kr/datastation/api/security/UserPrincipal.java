@@ -1,7 +1,7 @@
 package kr.datastation.api.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import kr.datastation.api.model.user.User;
+import kr.datastation.api.entity.user.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

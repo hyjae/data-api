@@ -1,9 +1,8 @@
-package kr.datastation.api.model.datastation;
+package kr.datastation.api.entity.datastation;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;

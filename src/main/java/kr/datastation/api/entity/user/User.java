@@ -1,4 +1,4 @@
-package kr.datastation.api.model.user;
+package kr.datastation.api.entity.user;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package kr.datastation.api.model.dataset;
+package kr.datastation.api.entity.dataset;
 
 import lombok.*;
 

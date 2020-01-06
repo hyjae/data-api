@@ -37,7 +37,7 @@ public class UserSourceConfig {
             EntityManagerFactoryBuilder builder) {
         return builder
                 .dataSource(userDataSource())
-                .packages("kr.datastation.api.model.user")
+                .packages("kr.datastation.api.entity.user")
                 .build();
     }
 

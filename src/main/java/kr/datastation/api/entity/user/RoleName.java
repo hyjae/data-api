@@ -1,4 +1,4 @@
-package kr.datastation.api.model.user;
+package kr.datastation.api.entity.user;
 
 
 public enum RoleName {

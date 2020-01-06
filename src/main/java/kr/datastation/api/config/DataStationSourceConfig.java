@@ -37,7 +37,7 @@ public class DataStationSourceConfig {
             EntityManagerFactoryBuilder builder) {
         return builder
                 .dataSource(dataStationDataSource())
-                .packages("kr.datastation.api.model.datastation")
+                .packages("kr.datastation.api.entity.datastation")
                 .build();
     }
 

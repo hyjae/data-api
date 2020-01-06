@@ -1,15 +1,11 @@
-package kr.datastation.api.model.dataset;
+package kr.datastation.api.entity.dataset;
 
 import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.Format;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 @Data
 @NoArgsConstructor

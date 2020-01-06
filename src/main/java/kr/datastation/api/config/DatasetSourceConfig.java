@@ -42,7 +42,7 @@ public class DatasetSourceConfig {
             EntityManagerFactoryBuilder builder) {
         return builder
                 .dataSource(datasetDataSource())
-                .packages("kr.datastation.api.model.dataset")
+                .packages("kr.datastation.api.entity.dataset")
                 .build();
     }
 

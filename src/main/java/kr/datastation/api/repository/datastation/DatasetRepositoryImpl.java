@@ -1,6 +1,6 @@
 package kr.datastation.api.repository.datastation;
 
-import kr.datastation.api.model.datastation.Dataset;
+import kr.datastation.api.entity.datastation.Dataset;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
 import org.springframework.stereotype.Repository;

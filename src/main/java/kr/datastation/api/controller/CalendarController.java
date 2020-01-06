@@ -3,7 +3,7 @@ package kr.datastation.api.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
-import kr.datastation.api.model.dataset.Calendar;
+import kr.datastation.api.entity.dataset.Calendar;
 import kr.datastation.api.vo.TimePoint;
 import kr.datastation.api.repository.dataset.CalendarCustomView;
 import kr.datastation.api.repository.dataset.CalendarRepository;

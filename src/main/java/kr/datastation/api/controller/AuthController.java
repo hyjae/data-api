@@ -1,9 +1,9 @@
 package kr.datastation.api.controller;
 
 import kr.datastation.api.advice.AppException;
-import kr.datastation.api.model.user.Role;
-import kr.datastation.api.model.user.RoleName;
-import kr.datastation.api.model.user.User;
+import kr.datastation.api.entity.user.Role;
+import kr.datastation.api.entity.user.RoleName;
+import kr.datastation.api.entity.user.User;
 import kr.datastation.api.repository.user.RoleRepository;
 import kr.datastation.api.repository.user.UserRepository;
 import kr.datastation.api.security.JwtTokenProvider;
@@ -11,6 +11,8 @@ import kr.datastation.api.advice.ApiResponse;
 import kr.datastation.api.vo.JwtAuthenticationResponse;
 import kr.datastation.api.vo.LoginRequest;
 import kr.datastation.api.vo.SignUpRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,8 @@ import java.util.Collections;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+    private static final Logger userLogger = LoggerFactory.getLogger("UserLogger");
 
     final AuthenticationManager authenticationManager;
     final UserRepository userRepository;
@@ -58,11 +62,15 @@ public class AuthController {
                         loginRequest.getPassword()
                 )
         );
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = tokenProvider.generateToken(authentication);
         return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+    }
+
+    @PostMapping("/signout")
+    public ResponseEntity<?> logoutUser() {
+        return new ResponseEntity(new ApiResponse(true, "Successfully logout!"), HttpStatus.OK);
     }
 
     @PostMapping("/signup")
@@ -89,6 +97,8 @@ public class AuthController {
         user.setRoles(Collections.singleton(userRole));
 
         User result = userRepository.save(user);
+
+        userLogger.info(user.getId()  + " AuthController.registerUser()");
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/users/{username}")

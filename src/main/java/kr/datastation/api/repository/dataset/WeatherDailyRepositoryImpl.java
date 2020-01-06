@@ -2,10 +2,10 @@ package kr.datastation.api.repository.dataset;
 
 
 import kr.datastation.api.advice.ResourceNotFoundException;
-import kr.datastation.api.model.dataset.WeatherArea;
-import kr.datastation.api.model.dataset.WeatherArea_;
-import kr.datastation.api.model.dataset.WeatherDaily;
-import kr.datastation.api.model.dataset.WeatherDaily_;
+import kr.datastation.api.entity.dataset.WeatherArea;
+import kr.datastation.api.entity.dataset.WeatherArea_;
+import kr.datastation.api.entity.dataset.WeatherDaily;
+import kr.datastation.api.entity.dataset.WeatherDaily_;
 import kr.datastation.api.util.ReflectionUtils;
 import kr.datastation.api.util.CommonUtils;
 import org.apache.commons.text.CaseUtils;

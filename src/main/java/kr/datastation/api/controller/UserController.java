@@ -1,7 +1,7 @@
 package kr.datastation.api.controller;
 
 import kr.datastation.api.advice.ResourceNotFoundException;
-import kr.datastation.api.model.user.User;
+import kr.datastation.api.entity.user.User;
 import kr.datastation.api.repository.user.UserRepository;
 import kr.datastation.api.security.CurrentUser;
 import kr.datastation.api.security.UserPrincipal;

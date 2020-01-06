@@ -77,7 +77,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .and()
                 // specific -> general
                 .authorizeRequests()
-                    .antMatchers("calendar/calendar/download").authenticated()
+                    .antMatchers("/calendar/calendar/download").authenticated()
                     .antMatchers("/news/entity/download").authenticated()
                     .antMatchers("/news/related/download").authenticated()
                     .antMatchers("/news/timeline/download").authenticated()

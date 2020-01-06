@@ -3,7 +3,7 @@ package kr.datastation.api.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
-import kr.datastation.api.model.dataset.WeatherDaily;
+import kr.datastation.api.entity.dataset.WeatherDaily;
 import kr.datastation.api.repository.dataset.WeatherDailyRepository;
 import kr.datastation.api.util.HttpResponseCSVWriter;
 import kr.datastation.api.util.ReflectionUtils;
