@@ -28,7 +28,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
         return new RequestLoggingAspect(jwtTokenProvider());
     }
 
-
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         argumentResolvers.add(new DateHandlerResolver());
